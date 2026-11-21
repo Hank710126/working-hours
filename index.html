@@ -769,7 +769,13 @@ async function openAddProjects(refresh) {
 /* ============================================================
  * 資料載入 / 儲存
  * ============================================================ */
+// 專案顯示順序：BU1 → BU15 (依數字)，同 BU 依專案名稱英文排序 (IG3 < IG10)；ADC 固定最後
+function projOrder(a, b) {
+  return (a.adc - b.adc) || (buKey(a.bu) - buKey(b.bu)) ||
+    a.sheet.localeCompare(b.sheet, 'en', { numeric: true, sensitivity: 'base' });
+}
 function setData(data) {
+  if (data && data.projects) data.projects.sort(projOrder);
   S.data = data;
   S.edits = {};
   updateSaveBar();
