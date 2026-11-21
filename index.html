@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fbf6ea">
+<title>Working Hours</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Working Hours">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<script>window.WH_API = "https://script.google.com/macros/s/AKfycbx89HFY--f129gWjMluW11EbfCTPu3YSQYjgQm7yhgA_FSiQmxl7JK1WNl52EdoQfdV/exec";</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+  /* 方格筆記本風格 (與 Logo 一致)；管理者 body.admin 換成橘色 */
+  :root{
+    --brand:#1f5f99; --brand-d:#174a78; --brand-l:#dbe9f6; --on-brand:#fff;
+    --paper:#fbf6ea; --grid:#ece5d2; --card:#fffdf7; --ink:#3a3226; --muted:#8a7f6c; --line:#ddd3bc;
+    --note1:#fff3b5; --note2:#d7ecf9; --note3:#fde0d8;
+    --ok:#2f7a2b; --ok-bar:#5aa152; --warn-ink:#9a6206; --warn-bar:#e3a21a; --err:#b8321a; --hol:#f6e9dc;
+    --radius:14px; --safe-b:env(safe-area-inset-bottom,0px);
+    --hand:'Patrick Hand','Comic Sans MS',cursive;
+  }
+  body.admin{
+    --brand:#e8731c; --brand-d:#c65f12; --brand-l:#ffe2c4;
+    --paper:#fff4e6; --grid:#f7ddc2; --note2:#ffe2c4;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;color:var(--ink);
+    font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif}
+  body{background-color:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:20px 20px;background-attachment:fixed}
+  button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+  input,textarea,select{font:inherit;color:inherit}
+  .hidden{display:none!important}
+  .hand{font-family:var(--hand)}
+
+  /* 標題列：一般 = 米白紙；管理者 = 橘色 */
+  .bar{position:sticky;top:0;z-index:20;background:var(--card);color:var(--ink);border-bottom:1.5px solid var(--ink);
+    padding:calc(env(safe-area-inset-top,0px) + 10px) 8px 10px;display:flex;align-items:center;gap:6px;min-height:56px}
+  body.admin .bar{background:var(--brand);color:#fff}
+  .logo{width:38px;height:38px;border-radius:10px;flex:none;background:center/cover no-repeat var(--card);border:1.5px solid var(--ink);margin-left:4px}
+  body:not(.admin) .logo{background-image:url(data:image/jpeg;base64,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)}
+  body.admin .logo{background-image:url(data:image/jpeg;base64,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);border-color:#fff}
+  .bar h1{font-size:18px;margin:0;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px;font-weight:600}
+  .bar .sub{display:block;font-size:12px;font-weight:400;opacity:.75}
+  .icon-btn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:none}
+  .icon-btn:active{background:rgba(0,0,0,.08)}
+  .icon-btn svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+  main{padding:12px 12px calc(96px + var(--safe-b));max-width:720px;margin:0 auto}
+  .section-title{font-size:13px;color:var(--muted);margin:18px 4px 8px;font-weight:600;letter-spacing:.02em}
+
+  /* 卡片 / 清單：深色描邊，像畫在紙上 */
+  .list,.card,.day,.summary-card{background:var(--card);border:1.5px solid var(--ink);border-radius:var(--radius);overflow:hidden}
+  .card{padding:14px}
+  .item{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1.5px dashed var(--line);width:100%;text-align:left;color:inherit}
+  .item:last-child{border-bottom:0}
+  .item:active{background:var(--brand-l)}
+  .item .t{flex:1;min-width:0}
+  .item .t b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .item .t small{color:var(--muted);font-size:12px}
+  .chev{color:var(--muted);flex:none}
+  .avatar{width:38px;height:38px;border-radius:50%;background:var(--brand-l);color:var(--brand-d);display:grid;place-items:center;font-weight:700;flex:none;border:1.5px solid var(--ink);font-family:var(--hand);font-size:18px}
+  .item.mine{background:var(--brand-l)}
+  .tag{font-size:11px;padding:2px 7px;border-radius:999px;background:var(--brand);color:var(--on-brand);margin-left:6px;vertical-align:1px}
+
+  .search{width:100%;padding:11px 14px;border:1.5px solid var(--ink);border-radius:12px;background:var(--card);margin-bottom:10px;outline:none}
+  .search:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-l)}
+
+  .resume{background:var(--brand);color:var(--on-brand);border:1.5px solid var(--ink);border-radius:var(--radius);padding:16px;display:flex;gap:12px;align-items:center;width:100%;text-align:left}
+  .resume small{opacity:.85}
+
+  /* 摘要：便利貼 */
+  .summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:10px;margin:2px 0 14px}
+  .summary>div{border:1.5px solid var(--ink);border-radius:10px;padding:10px 8px 8px;text-align:center;background:var(--note1);transform:rotate(-1.5deg)}
+  .summary>div:nth-child(2){background:var(--note2);transform:rotate(.8deg)}
+  .summary>div:nth-child(3){background:var(--note3);transform:rotate(1.6deg)}
+  .summary b{display:block;font-family:var(--hand);font-size:30px;line-height:1;color:var(--ink)!important;font-weight:400}
+  .summary small{color:var(--ink);font-size:11px;opacity:.8}
+
+  .chips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 12px;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:none;padding:7px 14px;border-radius:999px;background:var(--card);border:1.5px solid var(--ink);font-size:14px;white-space:nowrap}
+  .chip.on{background:var(--brand);border-color:var(--ink);color:var(--on-brand)}
+
+  /* 每日卡片 */
+  .day{margin-bottom:10px}
+  .day.hol{background:var(--hol)}
+  .day-h{display:flex;align-items:center;gap:12px;padding:12px 14px;width:100%;text-align:left}
+  .day-date{font-family:var(--hand);font-size:24px;line-height:1;min-width:58px}
+  .day-date.short{color:#d0281a}
+  .day-wd{color:var(--muted);font-size:12px}
+  .day-mid{flex:1;min-width:0}
+  .pbar{height:8px;border-radius:4px;background:#efe7d3;overflow:hidden;border:1px solid var(--line)}
+  .pbar span{display:block;height:100%;border-radius:4px}
+  .day-info{color:var(--muted);font-size:12px;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tot{font-family:var(--hand);font-size:22px;min-width:52px;text-align:right}
+  .tot.full{color:var(--ok)}
+  .tot.warn{color:var(--warn-ink)}
+  .tot.zero{color:#b9ad95}
+  .day-b{border-top:1.5px dashed var(--line)}
+  .proj{padding:10px 14px;border-bottom:1.5px dashed var(--line)}
+  .proj:last-child{border-bottom:0}
+  .proj.has{background:#fffbe9}
+  body.admin .proj.has{background:#fff6ea}
+  .proj-row{display:flex;align-items:center;gap:8px}
+  .proj-name{flex:1;min-width:0;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .proj-name small{font-weight:400;color:var(--ink);font-size:11px;background:#ece4cf;border-radius:5px;padding:1px 6px;margin-left:6px}
+  .dirty-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#f59e0b;margin-left:6px;vertical-align:1px;border:1px solid var(--ink)}
+  .stepper{display:flex;align-items:center;border:1.5px solid var(--ink);border-radius:999px;overflow:hidden;flex:none;background:#fff}
+  .stepper button{width:38px;height:36px;font-size:20px;color:var(--brand);display:grid;place-items:center}
+  .stepper button:active{background:var(--brand-l)}
+  .stepper input{width:44px;height:36px;border:0;text-align:center;outline:none;background:transparent;font-family:var(--hand);font-size:22px}
+  .act{margin-top:6px;width:100%;border:0;border-bottom:1.5px solid var(--line);border-radius:0;padding:6px 2px;font-size:14px;resize:none;outline:none;background:transparent;min-height:34px;color:#5e5442}
+  .act:focus{border-bottom-color:var(--brand)}
+  .stepper:focus-within{box-shadow:0 0 0 3px var(--brand-l)}
+  .more{display:block;width:100%;padding:11px;color:var(--brand-d);font-weight:600;border-top:1.5px dashed var(--line)}
+
+  /* 專案頁 */
+  .pcard{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1.5px dashed var(--line)}
+  .pcard:last-child{border-bottom:0}
+  .pcard .t{flex:1;min-width:0}
+  .pcard .t b{display:block}
+  .pcard .t small{color:var(--muted)}
+  .pcard .hrs{font-family:var(--hand);font-size:22px;color:var(--brand-d);min-width:48px;text-align:right}
+  .del{color:var(--err);padding:8px}
+  .primary{display:block;width:100%;padding:14px;border-radius:12px;background:var(--brand);color:var(--on-brand);font-weight:700;text-align:center;margin:12px 0;border:1.5px solid var(--ink)}
+  .primary:active{background:var(--brand-d)}
+  .primary:disabled{opacity:.5}
+  .ghost{display:block;width:100%;padding:13px;border-radius:12px;background:var(--card);color:var(--brand-d);font-weight:600;border:1.5px solid var(--ink);text-align:center;margin:10px 0}
+  .field label{display:block;font-size:13px;color:var(--muted);margin:0 0 6px}
+  .field textarea{width:100%;min-height:80px;border:1.5px solid var(--ink);border-radius:12px;padding:10px 12px;outline:none;background:#fff}
+  .hint{font-size:12px;color:var(--muted);margin-top:8px}
+
+  /* Admin 功能磚塊 */
+  .tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .tile{background:var(--card);border:1.5px solid var(--ink);border-radius:14px;padding:14px 6px 12px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;line-height:1.25;min-height:92px}
+  .tile .ic{width:54px;height:54px;border-radius:16px;border:1.5px solid var(--ink);display:grid;place-items:center;margin-bottom:2px}
+  .tile:nth-child(3n+1) .ic{background:var(--note1);transform:rotate(-3deg)}
+  .tile:nth-child(3n+2) .ic{background:var(--brand-l);transform:rotate(2deg)}
+  .tile:nth-child(3n) .ic{background:var(--note3);transform:rotate(-1.5deg)}
+  .tile.main .ic{background:#fff;border-color:var(--ink)}
+  .tile svg{width:34px;height:34px;fill:none;stroke:var(--ink);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+  .tile svg .f1{fill:#fff}
+  .tile svg .f2{fill:var(--brand)}
+  .tile svg .f3{fill:var(--note1)}
+  .tile:active{background:var(--brand-l)}
+  .tile.main{background:var(--brand);color:var(--on-brand);font-weight:600}
+
+  /* 底部分頁 */
+  .tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--card);border-top:1.5px solid var(--ink);display:flex;padding-bottom:var(--safe-b)}
+  .tabs button{flex:1;min-width:0;padding:8px 0 9px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;color:var(--muted);white-space:nowrap}
+  .tabs button.hidden{display:none}
+  .tabs button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .tabs button.on{color:var(--brand-d);font-weight:600}
+
+  /* 儲存提示條 */
+  .savebar{position:fixed;left:12px;right:12px;bottom:calc(68px + var(--safe-b));z-index:25;max-width:696px;margin:0 auto;
+    background:var(--brand);color:var(--on-brand);border:1.5px solid var(--ink);border-radius:14px;padding:10px 10px 10px 16px;display:flex;align-items:center;gap:10px}
+  .savebar span{flex:1;font-size:14px}
+  .savebar button{padding:8px 14px;border-radius:10px;font-weight:700}
+  .savebar .undo{color:inherit;opacity:.85}
+  .savebar .go{background:#fff;color:var(--brand-d);border:1.5px solid var(--ink)}
+
+  /* 底部面板 */
+  .backdrop{position:fixed;inset:0;background:rgba(40,30,15,.45);z-index:40;display:flex;align-items:flex-end;justify-content:center}
+  .sheet{background:var(--paper);width:100%;max-width:720px;max-height:88vh;border-radius:18px 18px 0 0;display:flex;flex-direction:column;padding-bottom:var(--safe-b);border:1.5px solid var(--ink);border-bottom:0}
+  .sheet-h{display:flex;align-items:center;padding:14px 16px;gap:8px;border-bottom:1.5px solid var(--ink);background:var(--card);border-radius:18px 18px 0 0}
+  .sheet-h h2{flex:1;font-size:17px;margin:0}
+  .sheet-b{overflow:auto;padding:12px}
+  .sheet-f{padding:10px 12px;border-top:1.5px solid var(--ink);background:var(--card)}
+  .pick{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1.5px dashed var(--line);background:var(--card);width:100%;text-align:left}
+  .pick input{width:20px;height:20px;accent-color:var(--brand)}
+  .pick .t{flex:1}
+  .bu{font-size:12px;color:var(--ink);background:#ece4cf;border-radius:6px;padding:2px 7px}
+  .bu-h{font-size:12px;color:var(--muted);padding:10px 14px 4px;font-weight:700}
+
+  /* 讀取中 / 提示 */
+  .loading{position:fixed;inset:0;z-index:60;background:rgba(251,246,234,.75);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--muted)}
+  .spin{width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--brand);border-radius:50%;animation:sp .8s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 66px);transform:translateX(-50%);z-index:70;
+    background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;max-width:90vw}
+  .toast.err{background:var(--err)}
+  .empty{text-align:center;color:var(--muted);padding:40px 20px}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <button class="icon-btn hidden" id="btnBack" aria-label="返回"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <div class="logo" aria-hidden="true"></div>
+  <h1 id="title">Working Hours</h1>
+  <button class="icon-btn hidden" id="btnReload" aria-label="重新整理"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button>
+</header>
+
+<main id="view"></main>
+
+<div class="savebar hidden" id="savebar">
+  <span id="saveInfo"></span>
+  <button class="undo" id="btnUndo">復原</button>
+  <button class="go" id="btnSave">儲存</button>
+</div>
+
+<nav class="tabs hidden" id="tabs">
+  <button data-tab="days" class="on"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>每日工時</button>
+  <button data-tab="projects"><svg viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h12"/></svg>我的專案</button>
+  <button data-tab="bu"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>BU 時數</button>
+  <button data-tab="list" class="hidden"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.2"/><circle cx="4.5" cy="12" r="1.2"/><circle cx="4.5" cy="18" r="1.2"/></svg>專案清單</button>
+  <button data-tab="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>設定</button>
+  <button data-tab="admin" class="hidden"><svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg>Admin</button>
+</nav>
+
+<div id="modal"></div>
+<div class="loading hidden" id="loading"><div class="spin"></div><div id="loadingText">讀取中…</div></div>
+
+<script>
+/* ============================================================
+ * 後端呼叫：Apps Script 上用 google.script.run；本機預覽用假資料
+ * ============================================================ */
+const IS_GAS = typeof google !== 'undefined' && google.script && google.script.run;
+// 網頁版 (GitHub Pages)：畫面放在自己的網址，透過 Apps Script 的資料 API (doPost) 讀寫試算表
+const WEB_API = (!IS_GAS && window.WH_API) || '';
+const USE_MOCK = !IS_GAS && (!WEB_API || /[?&]mock\b/.test(location.search));
+async function callWeb(fn, args) {
+  let res;
+  try {
+    res = await fetch(WEB_API, { method: 'POST', redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn, args }) });
+  } catch (e) { throw new Error('連線失敗，請確認網路後再試一次'); }
+  if (!res.ok) throw new Error('連線失敗（' + res.status + '），請稍後再試');
+  let j;
+  try { j = await res.json(); } catch (e) { throw new Error('伺服器回應格式錯誤，請稍後再試'); }
+  if (!j.ok) throw new Error(j.error || '發生錯誤');
+  return j.result;
+}
+function call(fn, ...args) {
+  if (!USE_MOCK && WEB_API) return callWeb(fn, args);
+  return new Promise((resolve, reject) => {
+    if (IS_GAS) {
+      google.script.run.withSuccessHandler(resolve).withFailureHandler(e => reject(e && e.message ? e : new Error(String(e))))[fn](...args);
+    } else {
+      setTimeout(() => { try { resolve(MOCK[fn](...JSON.parse(JSON.stringify(args)))); } catch (e) { reject(e); } }, 350);
+    }
+  });
+}
+// 需要登入的呼叫：自動帶上登入憑證；憑證失效時回到登入畫面
+async function callA(fn, ...args) {
+  try { return await call(fn, S.token, ...args); }
+  catch (e) {
+    if (/AUTH:/.test(e.message || '')) { logout(true); throw new Error(String(e.message).replace(/^.*AUTH:\s*/, '')); }
+    throw e;
+  }
+}
+
+/* 手機記住登入狀態 (每個裝置各自記住) */
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem('wh_' + k) || 'null'); } catch (e) { return null; } },
+  set(k, v) { try { v == null ? localStorage.removeItem('wh_' + k) : localStorage.setItem('wh_' + k, JSON.stringify(v)); } catch (e) { /* 無法儲存時下次需重新登入 */ } },
+};
+
+/* Face ID / 指紋 / 臉部解鎖 (只在網頁版)：
+ * 用手機內建的生物辨識 (WebAuthn) 當作「開 App 的鎖」。驗證成功才使用手機上記住的登入。 */
+const BIO = {
+  label: /iPhone|iPad|iPod/.test(navigator.userAgent) ? 'Face ID' : '指紋 / 臉部辨識',
+  async available() {
+    try { return !!(WEB_API && window.PublicKeyCredential && await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()); }
+    catch (e) { return false; }
+  },
+  get() { return store.get('bio'); },                       // { id, p }
+  rnd(n) { return crypto.getRandomValues(new Uint8Array(n)); },
+  b64(buf) { return btoa(String.fromCharCode(...new Uint8Array(buf))); },
+  unb64(s) { return Uint8Array.from(atob(s), c => c.charCodeAt(0)); },
+  async enable(person) {
+    const cred = await navigator.credentials.create({ publicKey: {
+      challenge: this.rnd(32), rp: { name: 'Working Hours', id: location.hostname },
+      user: { id: this.rnd(16), name: person, displayName: 'Working Hours · ' + person },
+      pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+      authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'discouraged' },
+      timeout: 60000 } });
+    store.set('bio', { id: this.b64(cred.rawId), p: person });
+  },
+  async verify() {
+    const b = this.get();
+    await navigator.credentials.get({ publicKey: {
+      challenge: this.rnd(32), rpId: location.hostname, userVerification: 'required', timeout: 60000,
+      allowCredentials: [{ type: 'public-key', id: this.unb64(b.id), transports: ['internal'] }] } });
+  },
+  off() { store.set('bio', null); },
+};
+
+/* ============================================================
+ * 狀態
+ * ============================================================ */
+const S = {
+  route: 'login',      // login | pin | home | sheet
+  token: store.get('token'), last: store.get('last'),
+  people: null, pinFor: null,
+  folders: null,
+  data: null,          // 工時表資料 (api_load)
+  edits: {},           // 'sheet|k' -> {h, a}
+  tab: 'days', week: null, openDays: {}, showAll: {}, peopleQuery: '',
+  admin: false, adminEmail: '',                  // 管理者 (Google 驗證為 hank.wang@quantatw.com)
+  buWeek: null, buOpen: {},                      // BU 時數
+  bp: null, bpTeam: 0, bpQuery: '',              // 專案清單 (BU Project)
+  drive: null, tm: null, tmDirty: false,         // 管理者：雲端硬碟、Team Member
+};
+const WD = ['日', '一', '二', '三', '四', '五', '六'];
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function toast(msg, err) {
+  const t = document.createElement('div');
+  t.className = 'toast' + (err ? ' err' : '');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), err ? 4500 : 2200);
+}
+let loadingCount = 0;
+function loading(on, text) {
+  loadingCount += on ? 1 : -1;
+  $('#loadingText').textContent = text || '讀取中…';
+  $('#loading').classList.toggle('hidden', loadingCount <= 0);
+}
+async function busy(text, fn) {
+  loading(true, text);
+  try { return await fn(); }
+  catch (e) { toast(e.message || String(e), true); throw e; }
+  finally { loading(false); }
+}
+
+/* ============================================================
+ * 時數 / Action 規則 (與試算表 onEdit 相同)
+ * ============================================================ */
+function num(v) { if (v === '' || v == null) return 0; const n = Number(v); return isFinite(n) ? n : 0; }
+function hasHours(v) { return num(v) !== 0; }
+function fmtH(n) { n = Math.round(n * 100) / 100; return String(n); }
+
+function cell(p, k) {
+  const key = p.sheet + '|' + k;
+  const base = p.cells[k];
+  if (!base) return null;
+  const e = S.edits[key];
+  return { r: base.r, h: e ? e.h : base.h, a: e ? e.a : base.a, dirty: !!e, base };
+}
+function setCell(p, k, h, a) {
+  const key = p.sheet + '|' + k;
+  const base = p.cells[k];
+  if (String(base.h) === String(h) && String(base.a) === String(a)) delete S.edits[key];
+  else S.edits[key] = { h, a };
+  updateSaveBar();
+}
+// 改時數：有時數且工作內容空白 (或是預設內容) -> 自動帶入預設工作內容；時數清為 0 -> 清掉自動帶入的內容 (ADC 除外)
+function changeHours(p, k, h) {
+  const c = cell(p, k);
+  const def = (S.data.action || '').trim();
+  let a = c.a || '';
+  if (!p.adc && def) {
+    const auto = !a.trim() || a.trim() === def;
+    if (hasHours(h) && auto) a = def;
+    if (!hasHours(h) && a.trim() === def) a = '';
+  }
+  setCell(p, k, h === '' ? '' : Number(h), a);
+}
+function dayTotal(k) {
+  return S.data.projects.reduce((s, p) => { const c = cell(p, k); return s + (c ? num(c.h) : 0); }, 0);
+}
+function projTotal(p) {
+  return S.data.days.reduce((s, d) => { const c = cell(p, d.k); return s + (c ? num(c.h) : 0); }, 0);
+}
+function dirtyCount() { return Object.keys(S.edits).length; }
+
+/* ============================================================
+ * 路由 / 畫面
+ * ============================================================ */
+function setBar(title, sub, back, reload) {
+  $('#title').innerHTML = esc(title) + (sub ? '<span class="sub">' + esc(sub) + '</span>' : '');
+  $('#btnBack').classList.toggle('hidden', !back);
+  $('#btnReload').classList.toggle('hidden', !reload);
+}
+function render() {
+  const v = $('#view');
+  $('#tabs').classList.toggle('hidden', S.route !== 'sheet');
+  if (S.route === 'login') return renderLogin(v);
+  if (S.route === 'pin') return renderPin(v);
+  if (S.route === 'locked') return renderLocked(v);
+  if (S.route === 'home') return renderHome(v);
+  if (S.route === 'sheet') return renderSheet(v);
+  if (S.route === 'admin') return renderAdmin(v);
+  if (S.route === 'drive') return renderDrive(v);
+  if (S.route === 'members') return renderMembers(v);
+  if (S.route === 'busum') return renderBuSum(v);
+}
+
+/* ---------- 登入：選名字 ---------- */
+function renderLogin(v) {
+  setBar('Working Hours 工時表', '請選擇你的名字', false, true);
+  if (!S.people) { v.innerHTML = '<div class="empty">讀取成員名單…</div>'; return; }
+  const q = S.peopleQuery.trim().toLowerCase();
+  const list = S.people.filter(p => !q || p.name.toLowerCase().includes(q));
+  let h = `<input class="search" id="peopleSearch" placeholder="搜尋姓名…" value="${esc(S.peopleQuery)}" autocomplete="off">`;
+  h += list.length ? '<div class="list">' + list.map(p => `
+    <button class="item" data-person="${esc(p.name)}">
+      <div class="avatar">${esc(p.name.slice(0, 1).toUpperCase())}</div>
+      <div class="t"><b>${esc(p.name)}</b><small>${p.has ? '輸入密碼登入' : '第一次使用：設定密碼'}</small></div>
+      <span class="chev">›</span></button>`).join('') + '</div>' : '<div class="empty">沒有符合的名字</div>';
+  h += '<div class="hint" style="text-align:center;margin-top:14px">登入後這支手機會記住你，下次打開直接進入自己的工時表。</div>';
+  v.innerHTML = h;
+  const s = $('#peopleSearch');
+  s.oninput = () => { S.peopleQuery = s.value; const pos = s.selectionStart; renderLogin(v); const n = $('#peopleSearch'); n.focus(); n.setSelectionRange(pos, pos); };
+}
+
+/* ---------- 登入：輸入 / 設定密碼 ---------- */
+// 密碼：英文＋數字，不分大小寫；新密碼 6～12 碼且至少 1 個英文字母、1 個數字 (舊的純數字密碼仍可登入)
+const PIN_ATTRS = 'inputmode="text" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="12"';
+const pinOk = s => /^[A-Za-z0-9]{4,12}$/.test(s);
+const newPinOk = s => /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9]{6,12}$/.test(s);
+const NEW_PIN_MSG = '密碼要 6～12 碼，至少包含 1 個英文字母和 1 個數字（例如 abc123）';
+
+function renderPin(v) {
+  const p = S.pinFor;
+  setBar(p.name, p.has ? '輸入密碼' : '第一次使用：設定密碼', true, false);
+  v.innerHTML = `<div class="card field" style="margin-top:8px">
+    <div style="text-align:center;margin:6px 0 16px"><div class="avatar" style="width:64px;height:64px;font-size:26px;margin:0 auto 8px">${esc(p.name.slice(0, 1).toUpperCase())}</div>
+      <b style="font-size:18px">${esc(p.name)}</b></div>
+    <label>${p.has ? '密碼' : '設定密碼（6～12 碼，英文＋數字）'}</label>
+    <input class="search" id="pin1" type="password" ${PIN_ATTRS} autocomplete="${p.has ? 'current-password' : 'new-password'}">
+    ${p.has ? '' : '<label>再輸入一次</label><input class="search" id="pin2" type="password" ' + PIN_ATTRS + ' autocomplete="new-password">'}
+    <button class="primary" id="btnLogin">${p.has ? '登入' : '設定密碼並登入'}</button>
+    <div class="hint">${p.has ? '英文不分大小寫。忘記密碼請聯絡管理者重設。' : '至少要有 1 個英文字母和 1 個數字，例如 abc123；英文不分大小寫。請記住這組密碼，換手機或清除瀏覽器資料後需要再輸入。'}</div>
+  </div>`;
+  setTimeout(() => { const i = $('#pin1'); if (i) i.focus(); }, 50);
+}
+async function doLogin() {
+  const p = S.pinFor;
+  const pin = $('#pin1').value.trim();
+  if (p.has && !pinOk(pin)) return toast('密碼只能是英文字母和數字', true);
+  if (!p.has && !newPinOk(pin)) return toast(NEW_PIN_MSG, true);
+  if (!p.has && pin.toLowerCase() !== $('#pin2').value.trim().toLowerCase()) return toast('兩次輸入的密碼不一樣', true);
+  const r = await busy(p.has ? '登入中…' : '設定密碼中…', () => call('api_login', p.name, pin));
+  S.token = r.token; store.set('token', r.token);
+  if (!S.last || (S.last.person || '').toLowerCase() !== p.name.toLowerCase()) { S.last = null; store.set('last', null); }
+  const bio = BIO.get();
+  if (bio && bio.p.toLowerCase() !== p.name.toLowerCase()) BIO.off();   // 換人登入：前一個人的 Face ID 失效
+  toast(r.created ? '✔ 密碼已設定，歡迎 ' + p.name : '✔ 歡迎 ' + p.name);
+  goHome(true);
+  if (!BIO.get() && await BIO.available()) offerBio(p.name);
+}
+// 登入後詢問是否啟用 Face ID / 指紋
+function offerBio(name) {
+  const M = openModal('下次用 ' + BIO.label + ' 開啟？', `<div class="card">
+      <p style="margin:0 0 6px">啟用後，每次打開 App 只要用 <b>${esc(BIO.label)}</b> 驗證，不用再輸入密碼。</p>
+      <div class="hint">可以隨時在「設定」關閉。</div></div>`,
+    `<button class="primary" style="margin:0" id="bioYes">啟用 ${esc(BIO.label)}</button><button class="ghost" style="margin:8px 0 0" data-close>以後再說</button>`);
+  M.q('#bioYes').onclick = async () => {
+    try { await BIO.enable(name); M.close(); toast('✔ 已啟用 ' + BIO.label); }
+    catch (e) { toast('沒有完成 ' + BIO.label + ' 設定，可以稍後在「設定」再試', true); }
+  };
+}
+// 開 App 時的鎖定畫面 (已啟用 Face ID / 指紋)
+function renderLocked(v) {
+  const name = S.token ? S.token.p : '';
+  setBar('Working Hours', name, false, false);
+  v.innerHTML = `<div class="card" style="margin-top:40px;text-align:center;padding:26px 18px">
+      <div style="font-size:46px;line-height:1">🔒</div>
+      <b style="display:block;font-size:20px;margin:12px 0 4px">${esc(name)}</b>
+      <div class="hint" style="margin:0 0 16px">用 ${esc(BIO.label)} 解鎖後進入你的工時表</div>
+      <button class="primary" id="btnUnlock" style="margin:0">用 ${esc(BIO.label)} 解鎖</button>
+      <button class="ghost" id="btnUsePin" style="margin:10px 0 0">改用密碼登入</button></div>`;
+}
+let unlocking = false;
+async function unlock(quiet) {
+  if (unlocking) return;
+  unlocking = true;
+  try { await BIO.verify(); S.route = 'home'; goHome(true); }
+  catch (e) { if (!quiet) toast('沒有通過 ' + BIO.label + ' 驗證，請再試一次，或改用密碼登入', true); }
+  finally { unlocking = false; }
+}
+function logout(silent) {
+  S.token = null; store.set('token', null);
+  S.last = null; store.set('last', null);
+  S.data = null; S.edits = {}; S.folders = null; S.pinFor = null;
+  updateSaveBar();
+  S.route = 'login'; render();
+  if (!silent || !S.people) loadPeople();
+}
+async function loadPeople() {
+  S.people = null; render();
+  try { S.people = await call('api_people'); } catch (e) { toast(e.message, true); S.people = []; }
+  if (S.route === 'login') render();
+}
+function goHome(autoOpen) {
+  S.route = 'home'; render();
+  loadFolders(autoOpen);
+}
+
+/* ---------- 首頁：週次資料夾 ---------- */
+function renderHome(v) {
+  const me = S.token ? S.token.p : '';
+  setBar(me ? me + ' 的工時表' : 'Working Hours', '選擇週次', false, true);
+  let h = '';
+  const last = S.last;
+  if (last && last.id) {
+    h += `<button class="resume" data-open="${esc(last.id)}">
+      <div class="avatar" style="background:rgba(255,255,255,.2);color:#fff">${esc(me.slice(0, 1).toUpperCase())}</div>
+      <div style="flex:1;min-width:0"><small>繼續上次的工時表</small><b style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(last.folderName || last.name)}</b><small>${esc(last.name)}</small></div>
+      <span>›</span></button>`;
+  }
+  h += '<div class="section-title">週次 (點選後直接開啟自己的檔案)</div>';
+  if (!S.folders) h += '<div class="empty">讀取中…</div>';
+  else if (!S.folders.length) h += '<div class="empty">沒有找到週次資料夾</div>';
+  else {
+    h += '<div class="list">' + S.folders.map((f, i) => `
+      <button class="item ${last && last.folderId === f.id ? 'mine' : ''}" data-folder="${esc(f.id)}">
+        <div class="avatar">${i === 0 ? '新' : '📁'}</div>
+        <div class="t"><b>${esc(f.name)}</b><small>${new Date(f.created).toLocaleDateString('zh-TW')} 建立</small></div>
+        <span class="chev">›</span></button>`).join('') + '</div>';
+  }
+  if (S.admin) h += '<button class="ghost" data-act="admin" style="margin-top:16px">🛡 Admin</button>';
+  h += `<div class="hint" style="text-align:center;margin-top:18px">登入身分：${esc(me)}${S.admin ? ' (Admin)' : ''}　<a href="#" id="lnkLogout" style="color:var(--brand)">不是你？切換使用者</a></div>`;
+  v.innerHTML = h;
+}
+
+/* ---------- 工時表 ---------- */
+function weeks() {
+  const out = [];
+  S.data.days.forEach(d => { if (!out.includes(String(d.w))) out.push(String(d.w)); });
+  return out;
+}
+function todayKey() {
+  const t = new Date();
+  return t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+}
+function parseKey(k) { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); }
+
+function renderSheet(v) {
+  const d = S.data;
+  setBar(d.person || d.title, d.folderName || d.title, true, true);
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === S.tab));
+  if (S.tab === 'days') renderDays(v);
+  else if (S.tab === 'projects') renderProjects(v);
+  else if (S.tab === 'bu') renderBU(v);
+  else if (S.tab === 'list') renderBPList(v);
+  else renderSettings(v);
+}
+
+function renderDays(v) {
+  const d = S.data;
+  const ws = weeks();
+  if (!S.week || !ws.includes(S.week)) {
+    const t = d.days.find(x => x.k === todayKey());
+    S.week = t ? String(t.w) : ws[0];
+  }
+  const days = d.days.filter(x => String(x.w) === S.week);
+  let h = diffBannerHtml() + `<div class="summary" id="summary">${summaryHtml()}</div>`;
+  h += '<div class="chips">' + ws.map(w => `<button class="chip ${w === S.week ? 'on' : ''}" data-week="${esc(w)}">Week ${esc(w)}</button>`).join('') + '</div>';
+  if (!d.projects.length) h += '<div class="empty">還沒有專案，請到「專案」頁新增</div>';
+
+  days.forEach(x => {
+    const dt = parseKey(x.k);
+    const open = !!S.openDays[x.k];
+    const used = usedProjects(x.k);
+    const isToday = x.k === todayKey();
+    h += `<div class="day ${x.hol ? 'hol' : ''}">
+      <button class="day-h" data-day="${x.k}">
+        <div><div class="day-date ${isShort(x) ? 'short' : ''}">${dt.getMonth() + 1}/${dt.getDate()}</div><div class="day-wd">週${WD[dt.getDay()]}${isToday ? ' · 今天' : ''}</div></div>
+        ${dayHeadHtml(x)}
+      </button>`;
+    if (open) {
+      const showAll = S.showAll[x.k] || !used.length;
+      const list = showAll ? d.projects : used;
+      h += '<div class="day-b">' + list.map(p => projEditor(p, x.k)).join('');
+      if (!showAll || used.length < d.projects.length) {
+        h += `<button class="more" data-showall="${x.k}">${showAll ? '只顯示有時數的專案' : '＋ 填寫其他專案 (' + (d.projects.length - used.length) + ')'}</button>`;
+      }
+      h += '</div>';
+    }
+    h += '</div>';
+  });
+  v.innerHTML = h;
+}
+
+// All 分頁與專案分頁不一致的提示
+function diffBannerHtml() {
+  const ds = S.data.diffs || [];
+  if (!ds.length) return '';
+  const fmtK = k => { const d = parseKey(k); return (d.getMonth() + 1) + '/' + d.getDate(); };
+  const v = x => (x === '' || x == null) ? '空白' : x;
+  const rows = ds.slice().sort((a, b) => a.k.localeCompare(b.k) || a.sheet.localeCompare(b.sheet))
+    .map(d => `<li>${fmtK(d.k)}　${esc(d.sheet)}：專案分頁 ${esc(v(d.proj))} → All 分頁 <b>${esc(v(d.all))}</b></li>`).join('');
+  return `<div class="card" style="background:var(--note1);margin-bottom:12px">
+    <b style="color:#7a5d00">⚠ All 分頁與專案分頁有 ${ds.length} 筆時數不一致</b>
+    <div class="hint" style="margin-top:4px">App 顯示的是專案分頁的時數。這通常是在 All 分頁填寫時，自動同步沒有成功造成的。</div>
+    <details style="margin-top:8px"><summary style="color:var(--brand);font-size:14px">查看明細</summary>
+      <ul style="margin:8px 0 0;padding-left:18px;font-size:13px;line-height:1.7">${rows}</ul></details>
+    <button class="primary" data-fix="all" style="margin:10px 0 0">以 All 分頁為準修正 (${ds.length} 筆)</button>
+    <button class="ghost" data-fix="proj" style="margin:8px 0 0">以專案分頁為準修正</button>
+  </div>`;
+}
+
+function usedProjects(k) {
+  return S.data.projects.filter(p => { const c = cell(p, k); return c && hasHours(c.h); });
+}
+function summaryHtml() {
+  const d = S.data;
+  const weekTot = d.days.filter(x => String(x.w) === S.week).reduce((s, x) => s + dayTotal(x.k), 0);
+  const allTot = d.days.reduce((s, x) => s + dayTotal(x.k), 0);
+  // 加班時數 (本週加總)：上班日超過 8 小時的部分；假日 (週末 / 國定假日) 的時數全部算加班
+  const ot = d.days.filter(x => String(x.w) === S.week)
+    .reduce((s, x) => s + (x.hol ? dayTotal(x.k) : Math.max(0, dayTotal(x.k) - 8)), 0);
+  return `<div><b>${fmtH(weekTot)}</b><small>Week ${esc(S.week)} 時數</small></div>
+    <div><b>${fmtH(allTot)}</b><small>本期總時數</small></div>
+    <div><b>${fmtH(ot)}</b><small>Week ${esc(S.week)} 加班時數</small></div>`;
+}
+// 未滿 8 小時的上班日 (日期標紅色)：有填寫但不足 8 小時；還沒填寫 (0 小時) 不標紅
+function isShort(x) {
+  const t = dayTotal(x.k);
+  return !x.hol && t > 0 && t < 8;
+}
+function dayHeadHtml(x) {
+  const tot = dayTotal(x.k);
+  const cls = tot === 0 ? 'zero' : tot < 8 ? 'warn' : 'full';
+  const used = usedProjects(x.k);
+  const info = used.length ? used.map(p => p.sheet + ' ' + fmtH(num(cell(p, x.k).h))).join('、') : (x.hol ? '假日' : '尚未填寫');
+  const pct = Math.min(100, tot / 8 * 100);
+  const color = tot >= 8 ? 'var(--ok-bar)' : 'var(--warn-bar)';
+  return `<div class="day-mid"><div class="pbar"><span style="width:${pct.toFixed(0)}%;background:${color}"></span></div><div class="day-info">${esc(info)}</div></div>` +
+    `<div class="tot ${cls}">${fmtH(tot)}h${tot >= 8 ? ' ✓' : ''}</div>`;
+}
+// 只更新受影響的格子 / 當天標題 / 摘要，不重畫整頁 (避免使用者正在輸入的欄位失去焦點)
+function refreshCell(box, p, k) {
+  const c = cell(p, k);
+  const inp = box.querySelector('[data-hours]');
+  if (document.activeElement !== inp) inp.value = c.h === '' ? '' : c.h;
+  const ta = box.querySelector('[data-action]');
+  if (ta.value !== c.a) { ta.value = c.a; ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; }
+  box.classList.toggle('has', hasHours(c.h));
+  const nm = box.querySelector('.proj-name');
+  const dot = nm.querySelector('.dirty-dot');
+  if (c.dirty && !dot) nm.insertAdjacentHTML('beforeend', '<span class="dirty-dot"></span>');
+  if (!c.dirty && dot) dot.remove();
+  const x = S.data.days.find(d => d.k === k);
+  const head = document.querySelector('.day-h[data-day="' + k + '"]');
+  if (head && x) {
+    head.querySelector('.day-mid').remove(); head.querySelector('.tot').remove(); head.insertAdjacentHTML('beforeend', dayHeadHtml(x));
+    head.querySelector('.day-date').classList.toggle('short', isShort(x));
+  }
+  const sm = $('#summary');
+  if (sm) sm.innerHTML = summaryHtml();
+}
+
+function projEditor(p, k) {
+  const c = cell(p, k);
+  if (!c) return '';
+  const id = encodeURIComponent(p.sheet) + '|' + k;
+  return `<div class="proj ${hasHours(c.h) ? 'has' : ''}" data-cell="${esc(id)}">
+    <div class="proj-row">
+      <div class="proj-name">${esc(p.sheet)}<small>${esc(p.bu)}</small>${c.dirty ? '<span class="dirty-dot"></span>' : ''}</div>
+      <div class="stepper">
+        <button data-step="-0.5" aria-label="減少">−</button>
+        <input inputmode="decimal" data-hours value="${esc(c.h === '' ? '' : c.h)}" placeholder="0">
+        <button data-step="0.5" aria-label="增加">＋</button>
+      </div>
+    </div>
+    <textarea class="act" rows="1" data-action placeholder="${p.adc ? '工作內容 (ADC 不自動帶入)' : '工作內容'}">${esc(c.a)}</textarea>
+  </div>`;
+}
+
+function renderProjects(v) {
+  const d = S.data;
+  let h = '<div class="section-title">已加入的專案 (' + d.projects.length + ')</div><div class="list">';
+  h += d.projects.map(p => `<div class="pcard">
+      <div class="t"><b>${esc(p.sheet)}</b><small>${esc(p.bu || '')}${p.adc ? ' · 固定分頁' : ''}</small></div>
+      <div class="hrs">${fmtH(projTotal(p))}h</div>
+      ${p.adc ? '<span style="width:38px"></span>' : `<button class="del" data-del="${esc(p.sheet)}" aria-label="刪除"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>`}
+    </div>`).join('');
+  h += '</div><button class="primary" id="btnAddProj">＋ 新增專案</button>';
+  h += '<div class="hint">刪除專案會一併刪除該專案分頁中的時數與工作內容。</div>';
+  v.innerHTML = h;
+}
+
+function renderSettings(v) {
+  const d = S.data;
+  v.innerHTML = `
+    <div class="section-title">預設工作內容 (Action)</div>
+    <div class="card field">
+      <textarea id="defAction" placeholder="例如：Experiment & Paper Work">${esc(d.action)}</textarea>
+      <div class="hint">填時數時，工作內容空白的格子會自動帶入這段文字 (ADC 除外)。按「套用」會更新所有專案已填時數的日期。</div>
+      <button class="primary" id="btnDefAction">套用到所有專案</button>
+    </div>
+    <div class="section-title">檔案</div>
+    <div class="list">
+      <div class="item"><div class="t"><b>${esc(d.title)}</b><small>${esc(d.folderName)} · ${esc(d.team || '')}</small></div></div>
+      <a class="item" href="${esc(d.url)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none"><div class="t"><b>在 Google 試算表開啟</b><small>查看完整表格</small></div><span class="chev">↗</span></a>
+      <button class="item" id="btnSwitch"><div class="t"><b>切換週次</b><small>回到週次清單</small></div><span class="chev">›</span></button>
+    </div>
+    <div class="section-title">帳號 · ${esc(S.token ? S.token.p : '')}</div>
+    <div class="list">
+      ${WEB_API ? `<button class="item" id="btnBio"><div class="t"><b>${esc(BIO.label)} 解鎖</b><small>${BIO.get() ? '已開啟：打開 App 時用 ' + esc(BIO.label) + ' 驗證' : '未開啟：打開 App 時直接進入'}</small></div><span class="chev" style="font-weight:700;color:${BIO.get() ? 'var(--ok)' : 'var(--muted)'}">${BIO.get() ? 'ON' : 'OFF'}</span></button>` : ''}
+      <button class="item" id="btnChangePin"><div class="t"><b>變更密碼</b><small>其他手機需要用新密碼重新登入</small></div><span class="chev">›</span></button>
+      <button class="item" id="btnLogout"><div class="t"><b style="color:var(--err)">登出 / 切換使用者</b><small>這支手機不再記住你的登入</small></div><span class="chev">›</span></button>
+    </div>`;
+}
+
+async function changePin() {
+  const p1 = prompt('輸入新密碼（6～12 碼，至少 1 個英文字母和 1 個數字，例如 abc123）');
+  if (p1 == null) return;
+  if (!newPinOk(p1.trim())) return toast(NEW_PIN_MSG, true);
+  const p2 = prompt('再輸入一次新密碼');
+  if (p2 == null) return;
+  if (p1.trim().toLowerCase() !== p2.trim().toLowerCase()) return toast('兩次輸入的密碼不一樣', true);
+  const r = await busy('變更密碼中…', () => callA('api_changePin', p1.trim()));
+  S.token = r.token; store.set('token', r.token);
+  toast('✔ 密碼已變更');
+}
+
+/* ---------- 新增專案 (底部面板) ---------- */
+async function openAddProjects(refresh) {
+  const res = await busy(refresh ? '更新專案清單…' : '讀取專案清單…', () => callA('api_availableProjects', S.data.id, !!refresh));
+  if (res.note) toast(res.note, /未更新/.test(res.note));
+  const picked = new Set();
+  let q = '';
+  const draw = () => {
+    const list = res.projects.filter(p => !q || p.name.toLowerCase().includes(q) || (p.bu || '').toLowerCase().includes(q));
+    let body = '', lastBu = null;
+    list.forEach(p => {
+      if (p.bu !== lastBu) { body += `<div class="bu-h">${esc(p.bu || '其他')}</div>`; lastBu = p.bu; }
+      body += `<label class="pick"><input type="checkbox" data-pick="${esc(p.name)}" ${picked.has(p.name) ? 'checked' : ''}><div class="t">${esc(p.name)}</div><span class="bu">${esc(p.bu || '')}</span></label>`;
+    });
+    $('#pickList').innerHTML = body || '<div class="empty">' + (res.projects.length ? '沒有符合的專案' : '「' + esc(res.team) + '」的專案都已經加入了') + '</div>';
+    $('#btnPickGo').textContent = picked.size ? '新增 ' + picked.size + ' 個專案' : '請勾選專案';
+    $('#btnPickGo').disabled = !picked.size;
+  };
+  $('#modal').innerHTML = `<div class="backdrop" id="bd"><div class="sheet">
+    <div class="sheet-h"><h2>新增專案 <small style="font-weight:400;color:var(--muted);font-size:13px">${esc(res.team)}</small></h2>
+      <button class="ghost" style="width:auto;margin:0;padding:6px 10px;font-size:13px" id="btnPickRefresh">更新清單</button>
+      <button class="icon-btn" id="btnPickClose" style="color:var(--muted)">✕</button></div>
+    <div class="sheet-b"><input class="search" id="pickSearch" placeholder="搜尋專案 / BU…" autocomplete="off"><div class="list" id="pickList"></div></div>
+    <div class="sheet-f"><button class="primary" style="margin:0" id="btnPickGo" disabled>請勾選專案</button></div>
+  </div></div>`;
+  draw();
+  const close = () => { $('#modal').innerHTML = ''; };
+  $('#bd').onclick = e => { if (e.target.id === 'bd') close(); };
+  $('#btnPickClose').onclick = close;
+  $('#btnPickRefresh').onclick = () => { close(); openAddProjects(true); };
+  $('#pickSearch').oninput = e => { q = e.target.value.trim().toLowerCase(); draw(); };
+  $('#pickList').onchange = e => {
+    const n = e.target.dataset.pick; if (!n) return;
+    e.target.checked ? picked.add(n) : picked.delete(n); draw();
+  };
+  $('#btnPickGo').onclick = async () => {
+    if (!(await ensureSaved())) return;
+    const picks = res.projects.filter(p => picked.has(p.name));
+    close();
+    const data = await busy('新增專案中… (約 10~30 秒)', () => callA('api_addProjects', S.data.id, picks));
+    setData(data);
+    toast('已新增：' + (data.added || []).join(', '));
+  };
+}
+
+/* ============================================================
+ * 資料載入 / 儲存
+ * ============================================================ */
+function setData(data) {
+  S.data = data;
+  S.edits = {};
+  updateSaveBar();
+  render();
+}
+async function openFile(id) {
+  if (S.data && S.data.id !== id && !(await ensureSaved())) return;
+  const data = await busy('開啟工時表…', () => callA('api_load', id));
+  S.route = 'sheet'; S.tab = 'days'; S.week = null; S.openDays = {}; S.showAll = {};
+  const t = data.days.find(x => x.k === todayKey());
+  if (t) S.openDays[t.k] = true;
+  S.last = { id: data.id, name: data.title, folderId: data.folderId, folderName: data.folderName, person: S.token && S.token.p };
+  store.set('last', S.last);
+  setData(data);
+}
+function updateSaveBar() {
+  const n = dirtyCount();
+  $('#savebar').classList.toggle('hidden', !n || S.route !== 'sheet');
+  $('#saveInfo').textContent = '有 ' + n + ' 筆變更尚未儲存';
+}
+async function save() {
+  const changes = Object.keys(S.edits).map(key => {
+    const i = key.lastIndexOf('|');
+    const sheet = key.slice(0, i), k = key.slice(i + 1);
+    const p = S.data.projects.find(x => x.sheet === sheet);
+    return { sheet, k, r: p.cells[k].r, h: S.edits[key].h, a: S.edits[key].a };
+  });
+  if (!changes.length) return true;
+  const data = await busy('儲存中…', () => callA('api_save', S.data.id, changes));
+  setData(data);
+  toast('✔ 已儲存 ' + (data.saved || changes.length) + ' 筆');
+  return true;
+}
+async function ensureSaved() {
+  if (!dirtyCount()) return true;
+  if (confirm('有 ' + dirtyCount() + ' 筆變更尚未儲存，要先儲存嗎？\n(按「取消」放棄變更)')) {
+    try { return await save(); } catch (e) { return false; }
+  }
+  S.edits = {}; updateSaveBar();
+  return true;
+}
+
+// autoOpen：打開 App 時直接進入最新週次的自己檔案
+async function loadFolders(autoOpen) {
+  S.folders = null; render();
+  try { S.folders = await callA('api_listFolders'); } catch (e) { if (S.route !== 'home') return; toast(e.message, true); S.folders = []; }
+  if (S.route !== 'home') return;
+  render();
+  if (autoOpen && S.folders.length) openFolder(S.folders[0].id, true);
+}
+// 週次 -> 自己的檔案
+async function openFolder(id, quiet) {
+  let f;
+  try { f = await busy('尋找你的檔案…', () => callA('api_findMyFile', id)); } catch (e) { return; }
+  if (!f) {
+    if (!quiet) toast('這個週次沒有找到「' + (S.token ? S.token.p : '') + '」的檔案', true);
+    return;
+  }
+  openFile(f.id);
+}
+
+/* ============================================================
+ * 事件
+ * ============================================================ */
+$('#view').addEventListener('click', async e => {
+  if (e.target.id === 'lnkLogout') { e.preventDefault(); if (confirm('登出並切換使用者？')) { BIO.off(); logout(); } return; }
+  const bt = e.target.closest('#btnUnlock,#btnUsePin,#btnBio');
+  if (bt && bt.id === 'btnUnlock') return unlock(false);
+  if (bt && bt.id === 'btnUsePin') {               // 鎖定畫面改用密碼：直接到這個人的輸入密碼畫面
+    S.pinFor = { name: S.token.p, has: true }; S.route = 'pin'; return render();
+  }
+  if (bt && bt.id === 'btnBio') {
+    if (BIO.get()) {
+      if (!confirm('關閉 ' + BIO.label + ' 解鎖？\n之後打開 App 會直接進入，不需要驗證。')) return;
+      BIO.off(); toast('已關閉 ' + BIO.label); return render();
+    }
+    if (!(await BIO.available())) return toast('這支手機（或瀏覽器）不支援 ' + BIO.label + '，或尚未在手機設定中啟用', true);
+    try { await BIO.enable(S.token.p); toast('✔ 已啟用 ' + BIO.label); }
+    catch (err) { toast('沒有完成 ' + BIO.label + ' 設定', true); }
+    return render();
+  }
+  const t = e.target.closest('button,[data-open],[data-folder]');
+  if (!t) return;
+  if (t.dataset.person) {
+    S.pinFor = S.people.find(p => p.name === t.dataset.person);
+    S.route = 'pin'; return render();
+  }
+  if (t.id === 'btnLogin') return doLogin().catch(() => {});
+  if (t.id === 'btnChangePin') return changePin().catch(() => {});
+  if (t.id === 'btnLogout') {
+    if (!confirm('登出後這支手機需要重新選名字、輸入密碼。確定登出？')) return;
+    if (await ensureSaved()) { BIO.off(); logout(); }
+    return;
+  }
+  if (t.dataset.folder) return openFolder(t.dataset.folder);
+  if (t.dataset.open) return openFile(t.dataset.open);
+  if (t.dataset.week) { S.week = t.dataset.week; return render(); }
+  if (t.dataset.day) { S.openDays[t.dataset.day] = !S.openDays[t.dataset.day]; return render(); }
+  if (t.dataset.showall) { const k = t.dataset.showall; S.showAll[k] = !S.showAll[k]; return render(); }
+  if (t.dataset.step) {
+    const box = t.closest('[data-cell]');
+    const [sheet, k] = cellId(box);
+    const p = S.data.projects.find(x => x.sheet === sheet);
+    const cur = num(cell(p, k).h);
+    const nv = Math.max(0, Math.min(24, Math.round((cur + Number(t.dataset.step)) * 2) / 2));
+    changeHours(p, k, nv === 0 ? '' : nv);
+    return refreshCell(box, p, k);
+  }
+  if (t.dataset.del) {
+    const name = t.dataset.del;
+    if (!confirm('確定刪除專案「' + name + '」？\n該分頁的時數與工作內容會一併刪除。')) return;
+    if (!(await ensureSaved())) return;
+    const data = await busy('刪除中…', () => callA('api_deleteProject', S.data.id, name));
+    setData(data); toast('已刪除「' + name + '」');
+    return;
+  }
+  if (t.dataset.fix) {
+    const useProj = t.dataset.fix === 'proj';
+    if (!(await ensureSaved())) return;
+    const n = (S.data.diffs || []).length;
+    if (!confirm(useProj ? '把 All 分頁的 ' + n + ' 筆時數，改成和專案分頁一樣？' : '把專案分頁的 ' + n + ' 筆時數，改成和 All 分頁一樣？')) return;
+    const data = await busy('修正中…', () => callA('api_fixFromAll', S.data.id, useProj));
+    setData(data); toast('✔ 已修正 ' + (data.fixed || 0) + ' 筆');
+    return;
+  }
+  if (t.id === 'btnAddProj') return openAddProjects(false);
+  if (t.id === 'btnSwitch') { if (await ensureSaved()) goHome(false); return; }
+  if (t.id === 'btnDefAction') {
+    if (!(await ensureSaved())) return;
+    const text = $('#defAction').value;
+    const data = await busy('套用中… (約 10~30 秒)', () => callA('api_setDefaultAction', S.data.id, text));
+    setData(data); toast('✔ 預設工作內容已套用');
+  }
+});
+function cellId(box) {
+  const id = box.dataset.cell; const i = id.lastIndexOf('|');
+  return [decodeURIComponent(id.slice(0, i)), id.slice(i + 1)];
+}
+
+$('#view').addEventListener('change', e => {
+  const box = e.target.closest('[data-cell]');
+  if (!box) return;
+  const [sheet, k] = cellId(box);
+  const p = S.data.projects.find(x => x.sheet === sheet);
+  if (e.target.hasAttribute('data-hours')) {
+    const raw = e.target.value.trim().replace(',', '.');
+    if (raw !== '' && (!isFinite(Number(raw)) || Number(raw) < 0 || Number(raw) > 24)) { toast('請輸入 0 ~ 24 的數字', true); e.target.value = cell(p, k).h; return; }
+    changeHours(p, k, raw === '' || Number(raw) === 0 ? '' : Number(raw));
+    e.target.value = cell(p, k).h;
+    refreshCell(box, p, k);
+  } else if (e.target.hasAttribute('data-action')) {
+    const c = cell(p, k);
+    setCell(p, k, c.h, e.target.value);
+    refreshCell(box, p, k);
+  }
+});
+$('#view').addEventListener('input', e => {     // 工作內容輸入框自動長高
+  if (e.target.classList.contains('act')) { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px'; }
+});
+$('#view').addEventListener('keydown', e => {
+  if (e.target.hasAttribute('data-hours') && e.key === 'Enter') e.target.blur();
+  if ((e.target.id === 'pin1' || e.target.id === 'pin2') && e.key === 'Enter') {
+    if (e.target.id === 'pin1' && $('#pin2')) $('#pin2').focus(); else doLogin().catch(() => {});
+  }
+});
+
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
+  if (b.dataset.tab === 'admin') { S.route = 'admin'; render(); window.scrollTo(0, 0); return; }
+  S.tab = b.dataset.tab; render(); window.scrollTo(0, 0);
+});
+$('#btnBack').onclick = async () => {
+  if (S.route === 'sheet') {
+    if (!(await ensureSaved())) return;
+    if (S.folders) { S.route = 'home'; render(); } else goHome(false);
+  } else if (S.route === 'pin') { S.route = 'login'; render(); }
+  else if (S.route === 'busum') { S.route = S.bsFrom || 'admin'; render(); }
+  else if (S.route === 'admin') { if (S.data) { S.route = 'sheet'; render(); } else goHome(false); }
+  else if (S.route === 'drive') { if (S.drive && !S.drive.isTop && S.drive.parentId) loadDrive(S.drive.parentId); else { S.route = 'admin'; render(); } }
+  else if (S.route === 'members') { if (S.tmDirty && !confirm('Team Member 的修改還沒儲存，確定離開？')) return; S.tmDirty = false; S.route = 'admin'; render(); }
+};
+$('#btnReload').onclick = async () => {
+  if (S.route === 'drive') return loadDrive(S.drive ? S.drive.id : '');
+  if (S.route === 'busum') return openBuSum(S.bs && S.bs.folderId, true);
+  if (S.route === 'members') { if (S.tmDirty && !confirm('放棄尚未儲存的修改並重新讀取？')) return; return loadMembers(); }
+  if (S.route === 'sheet' && S.tab === 'list') return loadBP();
+  if (S.route === 'sheet') {
+    if (dirtyCount() && !confirm('重新讀取會放棄尚未儲存的變更，確定？')) return;
+    const data = await busy('重新讀取…', () => callA('api_load', S.data.id)); setData(data); toast('已更新');
+  } else if (S.route === 'login') loadPeople();
+  else loadFolders(false);
+};
+$('#btnSave').onclick = () => save().catch(() => {});
+$('#btnUndo').onclick = () => { if (confirm('放棄 ' + dirtyCount() + ' 筆尚未儲存的變更？')) { S.edits = {}; updateSaveBar(); render(); } };
+window.addEventListener('beforeunload', e => { if (dirtyCount()) { e.preventDefault(); e.returnValue = ''; } });
+
+/* ============================================================
+ * 啟動
+ * ============================================================ */
+/* ============================================================
+ * 共用：底部面板 (modal)
+ * ============================================================ */
+function openModal(title, body, foot) {
+  $('#modal').innerHTML = `<div class="backdrop" id="bd"><div class="sheet">
+    <div class="sheet-h"><h2>${title}</h2><button class="icon-btn" data-close style="color:var(--muted)">✕</button></div>
+    <div class="sheet-b">${body}</div>${foot ? '<div class="sheet-f">' + foot + '</div>' : ''}</div></div>`;
+  const el = $('#bd');
+  const close = () => { $('#modal').innerHTML = ''; };
+  el.addEventListener('click', e => { if (e.target.id === 'bd' || e.target.closest('[data-close]')) close(); });
+  return { el, close, q: s => el.querySelector(s) };
+}
+const buKey = b => { const m = String(b || '').match(/(\d+)/); return m ? Number(m[1]) : 9999; };
+const buSort = (a, b) => buKey(a) - buKey(b) || String(a).localeCompare(String(b));
+
+/* ============================================================
+ * BU 時數：本期各週、各 BU 的時數累計 (含尚未儲存的修改)
+ * ============================================================ */
+function buStats() {
+  const m = {}, pj = {};
+  S.data.projects.forEach(p => {
+    const bu = p.bu || '(未填 BU)';
+    S.data.days.forEach(d => {
+      const c = cell(p, d.k); const h = c ? num(c.h) : 0;
+      if (!h) return;
+      const w = String(d.w);
+      m[bu] = m[bu] || {}; m[bu][w] = (m[bu][w] || 0) + h;
+      pj[bu] = pj[bu] || {}; pj[bu][p.sheet] = pj[bu][p.sheet] || {}; pj[bu][p.sheet][w] = (pj[bu][p.sheet][w] || 0) + h;
+    });
+  });
+  return { ws: weeks(), bus: Object.keys(m).sort(buSort), m, pj };
+}
+function renderBU(v) {
+  const st = buStats();
+  if (!S.buWeek) { const t = S.data.days.find(x => x.k === todayKey()); S.buWeek = t ? String(t.w) : 'all'; }
+  const sel = S.buWeek;
+  const val = (bu, w) => w === 'all' ? Object.values(st.m[bu] || {}).reduce((a, b) => a + b, 0) : ((st.m[bu] || {})[w] || 0);
+  const pval = (bu, p, w) => { const x = st.pj[bu][p]; return w === 'all' ? Object.values(x).reduce((a, b) => a + b, 0) : (x[w] || 0); };
+  const rows = st.bus.map(bu => ({ bu, h: val(bu, sel) })).filter(r => r.h);
+  const tot = rows.reduce((s, r) => s + r.h, 0);
+  const max = Math.max(1, ...rows.map(r => r.h));
+
+  let h = S.admin ? '<button class="ghost" data-act="butab" style="margin:0 0 12px">👥 看本期全部人的 BU 時數 (Hank Team / JL Team)</button>' : '';
+  h += '<div class="chips">' + [['all', '全部期間']].concat(st.ws.map(w => [w, 'Week ' + w]))
+    .map(([w, t]) => `<button class="chip ${w === sel ? 'on' : ''}" data-buweek="${esc(w)}">${esc(t)}</button>`).join('') + '</div>';
+  h += `<div class="summary"><div><b>${fmtH(tot)}</b><small>${sel === 'all' ? '本期' : 'Week ' + esc(sel)} 總時數</small></div><div><b>${rows.length}</b><small>BU 數</small></div></div>`;
+  if (!rows.length) h += '<div class="empty">這段期間還沒有時數</div>';
+  else h += '<div class="list">' + rows.map(r => {
+    const open = !!S.buOpen[r.bu];
+    let x = `<button class="item" data-buopen="${esc(r.bu)}" style="display:block">
+      <div style="display:flex;align-items:center;gap:10px"><b style="flex:1">${esc(r.bu)}</b>
+        <span style="color:var(--muted);font-size:12px">${Math.round(r.h / tot * 100)}%</span>
+        <b style="color:var(--brand);min-width:54px;text-align:right">${fmtH(r.h)}h</b></div>
+      <div style="height:6px;background:#efe7d3;border:1px solid var(--line);border-radius:3px;margin-top:8px"><div style="height:6px;border-radius:3px;background:var(--brand);width:${(r.h / max * 100).toFixed(1)}%"></div></div>
+    </button>`;
+    if (open) x += '<div style="background:var(--paper);padding:4px 14px 10px">' + Object.keys(st.pj[r.bu]).map(p => ({ p, h: pval(r.bu, p, sel) })).filter(o => o.h)
+      .sort((a, b) => b.h - a.h).map(o => `<div style="display:flex;padding:5px 0;font-size:14px"><span style="flex:1">${esc(o.p)}</span><b>${fmtH(o.h)}h</b></div>`).join('') + '</div>';
+    return x;
+  }).join('') + '</div>';
+
+  // 各週 × BU 總表
+  if (st.bus.length) {
+    const colTot = w => st.bus.reduce((s, bu) => s + val(bu, w), 0);
+    h += '<div class="section-title">各週 BU 時數</div><div class="card" style="padding:0;overflow-x:auto"><table style="border-collapse:collapse;width:100%;font-size:13px;white-space:nowrap">';
+    h += '<tr style="background:var(--brand-l)"><th style="text-align:left;padding:8px 10px">BU</th>' + st.ws.map(w => `<th style="padding:8px 6px;text-align:right">W${esc(w)}</th>`).join('') + '<th style="padding:8px 10px;text-align:right">合計</th></tr>';
+    h += st.bus.map(bu => `<tr style="border-top:1px solid var(--line)"><td style="padding:7px 10px;font-weight:600">${esc(bu)}</td>` +
+      st.ws.map(w => `<td style="padding:7px 6px;text-align:right">${val(bu, w) ? fmtH(val(bu, w)) : '<span style="color:#c4cbd3">-</span>'}</td>`).join('') +
+      `<td style="padding:7px 10px;text-align:right;font-weight:700">${fmtH(val(bu, 'all'))}</td></tr>`).join('');
+    h += '<tr style="border-top:2px solid var(--line);background:var(--paper)"><td style="padding:8px 10px;font-weight:700">合計</td>' +
+      st.ws.map(w => `<td style="padding:8px 6px;text-align:right;font-weight:700">${fmtH(colTot(w))}</td>`).join('') +
+      `<td style="padding:8px 10px;text-align:right;font-weight:700;color:var(--brand)">${fmtH(colTot('all'))}</td></tr></table></div>`;
+  }
+  if (dirtyCount()) h += '<div class="hint">（含尚未儲存的修改）</div>';
+  v.innerHTML = h;
+}
+
+/* ============================================================
+ * 專案清單：雲端硬碟的 BU Project (所有人可修改)
+ * ============================================================ */
+async function loadBP() {
+  try { S.bp = await busy('讀取專案清單…', () => callA('api_buProjects')); }
+  catch (e) { S.bp = S.bp || { teams: [], error: e.message }; }
+  if (S.bpTeam >= S.bp.teams.length) S.bpTeam = 0;
+  render();
+}
+function renderBPList(v) {
+  if (!S.bp) { v.innerHTML = '<div class="empty">讀取中…</div>'; loadBP(); return; }
+  if (S.bp.error && !S.bp.teams.length) { v.innerHTML = '<div class="empty">' + esc(S.bp.error) + '</div>'; return; }
+  const tm = S.bp.teams[S.bpTeam];
+  const q = S.bpQuery.trim().toLowerCase();
+  let h = '<div class="chips">' + S.bp.teams.map((t, i) => `<button class="chip ${i === S.bpTeam ? 'on' : ''}" data-bpteam="${i}">${esc(t.team)} (${t.rows.length})</button>`).join('') + '</div>';
+  h += `<input class="search" id="bpSearch" placeholder="搜尋專案 / BU…" value="${esc(S.bpQuery)}" autocomplete="off">`;
+  h += '<button class="primary" data-act="bpadd" style="margin:0 0 10px">＋ 新增專案到 ' + esc(tm ? tm.team : '') + '</button>';
+  const list = tm ? tm.rows.map((r, i) => Object.assign({ i }, r)).filter(r => !q || r.name.toLowerCase().includes(q) || r.bu.toLowerCase().includes(q))
+    .sort((a, b) => buSort(a.bu, b.bu) || a.name.localeCompare(b.name, 'en', { numeric: true })) : [];
+  let last = null;
+  h += list.length ? '<div class="list">' + list.map(r => {
+    let x = '';
+    if (r.bu !== last) { x += `<div class="bu-h" style="background:var(--paper)">${esc(r.bu || '未填 BU')}</div>`; last = r.bu; }
+    return x + `<button class="item" data-bpedit="${r.i}"><div class="t"><b>${esc(r.name)}</b></div><span class="bu">${esc(r.bu)}</span><span class="chev">›</span></button>`;
+  }).join('') + '</div>' : '<div class="empty">沒有符合的專案</div>';
+  h += `<div class="hint">修改會直接寫入雲端硬碟的「${esc(S.bp.title || 'BU Project')}」，所有人「新增專案」時會看到最新清單。已加入工時表的專案分頁名稱不會跟著改。</div>`;
+  if (S.bp.url) h += `<a class="ghost" href="${esc(S.bp.url)}" target="_blank" rel="noopener" style="text-decoration:none">在 Google 試算表開啟 BU Project ↗</a>`;
+  v.innerHTML = h;
+  const s = $('#bpSearch');
+  s.oninput = () => { S.bpQuery = s.value; const pos = s.selectionStart; renderBPList(v); const n = $('#bpSearch'); n.focus(); n.setSelectionRange(pos, pos); };
+}
+function bpEdit(idx) {
+  const tm = S.bp.teams[S.bpTeam];
+  const cur = idx >= 0 ? tm.rows[idx] : { name: '', bu: '' };
+  const bus = new Set(); S.bp.teams.forEach(t => t.rows.forEach(r => r.bu && bus.add(r.bu)));
+  for (let i = 1; i <= 15; i++) bus.add('BU' + i);
+  const M = openModal(idx >= 0 ? '修改專案' : '新增專案 · ' + esc(tm.team), `
+    <div class="card field">
+      <label>專案名稱</label><input class="search" id="bpName" value="${esc(cur.name)}" autocomplete="off">
+      <label>BU</label><input class="search" id="bpBu" list="buList" value="${esc(cur.bu)}" autocomplete="off" placeholder="例如 BU10">
+      <datalist id="buList">${[...bus].sort(buSort).map(b => `<option value="${esc(b)}">`).join('')}</datalist>
+      ${idx >= 0 ? '<div class="hint">改名不會更改已加入工時表的專案分頁名稱。</div>' : ''}
+    </div>`,
+    `<button class="primary" style="margin:0" id="bpOk">${idx >= 0 ? '儲存修改' : '新增'}</button>` +
+    (idx >= 0 ? '<button class="ghost" style="margin:8px 0 0;color:var(--err)" id="bpDel">刪除這個專案</button>' : ''));
+  setTimeout(() => M.q('#bpName').focus(), 50);
+  const commit = async rows => {
+    const teams = S.bp.teams.map((t, i) => ({ col: t.col, rows: i === S.bpTeam ? rows : t.rows }));
+    M.close();
+    S.bp = await busy('寫入 BU Project…', () => callA('api_buProjectsSave', teams, S.bp.ver));
+    render(); toast('✔ 專案清單已更新');
+  };
+  M.q('#bpOk').onclick = () => {
+    const name = M.q('#bpName').value.trim(), bu = M.q('#bpBu').value.trim().toUpperCase().replace(/^BU\s+/, 'BU');
+    if (!name) return toast('請輸入專案名稱', true);
+    if (tm.rows.some((r, i) => i !== idx && r.name.toLowerCase() === name.toLowerCase())) return toast('「' + name + '」已經在 ' + tm.team + ' 的清單裡', true);
+    const rows = tm.rows.map(r => Object.assign({}, r));
+    if (idx >= 0) rows[idx] = { name, bu }; else rows.push({ name, bu });
+    commit(rows).catch(() => {});
+  };
+  if (idx >= 0) M.q('#bpDel').onclick = () => {
+    if (!confirm('從 ' + tm.team + ' 的清單刪除「' + cur.name + '」？\n(已加入工時表的專案分頁不會被刪除)')) return;
+    commit(tm.rows.filter((_, i) => i !== idx)).catch(() => {});
+  };
+}
+
+/* ============================================================
+ * 管理者功能
+ * ============================================================ */
+// 每週備份卡片 (Admin 頁最上方)
+function nextBackupText() {
+  const n = new Date(); const d = new Date(n);
+  d.setHours(17, 0, 0, 0);
+  d.setDate(d.getDate() + ((3 - d.getDay() + 7) % 7));
+  if (d <= n) d.setDate(d.getDate() + 7);
+  return (d.getMonth() + 1) + '/' + d.getDate() + '（週三）17:00';
+}
+function backupCardHtml() {
+  const b = S.backup;
+  if (b === undefined) { setTimeout(loadBackup, 0); S.backup = null; }
+  if (!b) return '<div class="card" style="margin-bottom:6px;background:var(--note1)"><b>每週備份</b><div class="hint">讀取備份狀態…</div></div>';
+  return `<div class="card" style="margin-bottom:6px;background:var(--note1)">
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="ic" style="width:48px;height:48px;border-radius:14px;border:1.5px solid var(--ink);display:grid;place-items:center;background:#fff;flex:none">
+        <svg viewBox="0 0 24 24" style="width:30px;height:30px;fill:none;stroke:var(--ink);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round" aria-hidden="true"><path d="M4 7.5A1.5 1.5 0 0 1 5.5 6h4l2 2h7A1.5 1.5 0 0 1 20 9.5v8a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z" style="fill:var(--brand-l)"/><path d="M12 11v5m-2.3-2.3L12 16l2.3-2.3"/></svg></span>
+      <div style="flex:1;min-width:0"><b>每週備份</b>
+        <div style="font-size:12px">${b.last ? '上次：' + esc(b.last.when) + '・' + b.last.files + ' 個檔案' : '還沒有備份過'}</div>
+        <div style="font-size:12px;color:${b.scheduled ? 'var(--ok)' : 'var(--err)'}">${b.scheduled ? '✔ 自動備份：下次 ' + nextBackupText() : '✖ 自動備份未啟用'}</div></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="primary" data-act="backupnow" style="margin:0;flex:1;padding:10px">立即備份</button>
+      <button class="ghost" data-act="${b.scheduled ? 'backupoff' : 'backupon'}" style="margin:0;flex:1;padding:10px">${b.scheduled ? '停用自動備份' : '啟用每週三 17:00'}</button>
+    </div>
+    <div class="hint">${esc(b.source)} → <a href="${esc(b.folderUrl)}" target="_blank" rel="noopener" style="color:var(--brand-d)">${esc(b.location)} ↗</a>，每次備份會覆蓋上一次（舊備份移到垃圾桶）。</div>
+  </div>`;
+}
+async function loadBackup() {
+  try { S.backup = await call('api_adminBackupStatus'); } catch (e) { S.backup = null; toast(e.message, true); return; }
+  const c = $('#backupCard'); if (c && S.route === 'admin') c.innerHTML = backupCardHtml();
+}
+
+// ===== Admin：本期所有人的 BU 時數 (可依 Team 分開看) =====
+async function openBuSum(folderId, refresh) {
+  if (!S.folders) S.folders = await busy('讀取週次…', () => callA('api_listFolders'));
+  const fid = folderId || (S.data && S.data.folderId) || (S.folders[0] && S.folders[0].id);
+  if (!fid) return toast('找不到週次資料夾', true);
+  if (S.route !== 'busum') S.bsFrom = S.route;
+  const data = await busy(refresh ? '重新統計所有人的時數…（約 20~60 秒）' : '統計所有人的時數…（第一次約 20~60 秒）',
+    () => call('api_adminBuSummary', fid, !!refresh)).catch(() => null);
+  if (!data) return;
+  if (!S.bs || S.bs.folderId !== data.folderId) { S.bsGroup = ''; S.bsWeek = 'all'; S.bsOpen = {}; }
+  S.bs = data; S.route = 'busum'; render(); window.scrollTo(0, 0);
+}
+function bsAgg(group, week) {                // -> { bu: { total, people: { name: h } } }
+  const d = S.bs, out = {};
+  d.rows.forEach(([pi, bi, w, hrs]) => {
+    const p = d.people[pi];
+    if (group && p.team !== group) return;
+    if (week !== 'all' && w !== week) return;
+    const bu = d.bus[bi];
+    const o = out[bu] = out[bu] || { total: 0, people: {} };
+    o.total += hrs; o.people[p.name] = (o.people[p.name] || 0) + hrs;
+  });
+  return out;
+}
+function renderBuSum(v) {
+  const d = S.bs;
+  setBar('BU 時數 · 全部人', d.folderName, true, true);
+  const groups = [''].concat(d.teams);
+  const cnt = g => d.people.filter(p => !g || p.team === g).length;
+  const sel = S.bsWeek || 'all', grp = S.bsGroup || '';
+  const agg = bsAgg(grp, sel);
+  const rows = Object.keys(agg).sort(buSort).map(bu => ({ bu, h: agg[bu].total }));
+  const tot = rows.reduce((s, r) => s + r.h, 0);
+  const max = Math.max(1, ...rows.map(r => r.h));
+  const dash = '<span style="color:#c4b9a3">-</span>';
+
+  let h = `<select class="search" id="bsFolder">${S.folders.map(f => `<option value="${esc(f.id)}" ${f.id === d.folderId ? 'selected' : ''}>${esc(f.name)}</option>`).join('')}</select>`;
+  h += '<div class="chips">' + groups.map(g => `<button class="chip ${g === grp ? 'on' : ''}" data-bsgroup="${esc(g)}">${esc(g || '全部人')} (${cnt(g)})</button>`).join('') + '</div>';
+  h += '<div class="chips">' + [['all', '全部期間']].concat(d.weeks.map(w => [w, 'Week ' + w]))
+    .map(([w, t]) => `<button class="chip ${w === sel ? 'on' : ''}" data-bsweek="${esc(w)}">${esc(t)}</button>`).join('') + '</div>';
+  h += `<div class="summary"><div><b>${fmtH(tot)}</b><small>${sel === 'all' ? '本期' : 'Week ' + esc(sel)} 總時數</small></div>
+    <div><b>${cnt(grp)}</b><small>${esc(grp || '全部')} 人數</small></div><div><b>${rows.length}</b><small>BU 數</small></div></div>`;
+
+  // 依 Team 分開 (選「全部人」時)
+  if (!grp && d.teams.length && rows.length) {
+    const byTeam = d.teams.map(t => bsAgg(t, sel));
+    h += '<div class="section-title">各 Team 的 BU 時數' + (sel === 'all' ? '' : '（Week ' + esc(sel) + '）') + '</div>';
+    h += '<div class="card" style="padding:0;overflow-x:auto"><table style="border-collapse:collapse;width:100%;font-size:13px;white-space:nowrap">';
+    h += '<tr style="background:var(--brand-l)"><th style="text-align:left;padding:8px 10px">BU</th>' + d.teams.map(t => `<th style="padding:8px 8px;text-align:right">${esc(t)}</th>`).join('') + '<th style="padding:8px 10px;text-align:right">合計</th></tr>';
+    h += rows.map(r => `<tr style="border-top:1px dashed var(--line)"><td style="padding:7px 10px;font-weight:600">${esc(r.bu)}</td>` +
+      byTeam.map(a => `<td style="padding:7px 8px;text-align:right">${a[r.bu] ? fmtH(a[r.bu].total) : dash}</td>`).join('') +
+      `<td style="padding:7px 10px;text-align:right;font-weight:700">${fmtH(r.h)}</td></tr>`).join('');
+    h += '<tr style="border-top:2px solid var(--ink);background:var(--paper)"><td style="padding:8px 10px;font-weight:700">合計</td>' +
+      byTeam.map(a => `<td style="padding:8px 8px;text-align:right;font-weight:700">${fmtH(Object.values(a).reduce((s, x) => s + x.total, 0))}</td>`).join('') +
+      `<td style="padding:8px 10px;text-align:right;font-weight:700;color:var(--brand-d)">${fmtH(tot)}</td></tr></table></div>`;
+  }
+
+  // BU 長條 (點開看每個人)
+  h += '<div class="section-title">' + esc(grp || '全部人') + ' · 各 BU（點開看每個人）</div>';
+  if (!rows.length) h += '<div class="empty">這段期間沒有時數</div>';
+  else h += '<div class="list">' + rows.map(r => {
+    let x = `<button class="item" data-bsopen="${esc(r.bu)}" style="display:block">
+      <div style="display:flex;align-items:center;gap:10px"><b style="flex:1">${esc(r.bu)}</b>
+        <span style="color:var(--muted);font-size:12px">${Math.round(r.h / tot * 100)}%</span>
+        <b class="hand" style="color:var(--brand-d);font-size:20px;font-weight:400;min-width:54px;text-align:right">${fmtH(r.h)}h</b></div>
+      <div class="pbar" style="margin-top:6px"><span style="width:${(r.h / max * 100).toFixed(1)}%;background:var(--brand)"></span></div></button>`;
+    if (S.bsOpen[r.bu]) x += '<div style="background:var(--paper);padding:4px 14px 10px">' + Object.entries(agg[r.bu].people).sort((a, b) => b[1] - a[1])
+      .map(([n, hh]) => `<div style="display:flex;padding:5px 0;font-size:14px"><span style="flex:1">${esc(n)} <small style="color:var(--muted)">${esc((d.people.find(p => p.name === n) || {}).team || '')}</small></span><b>${fmtH(hh)}h</b></div>`).join('') + '</div>';
+    return x;
+  }).join('') + '</div>';
+
+  // 各週 × BU
+  if (rows.length) {
+    const allAgg = bsAgg(grp, 'all');
+    const perWeek = {}; d.weeks.forEach(w => { perWeek[w] = bsAgg(grp, w); });
+    h += '<div class="section-title">' + esc(grp || '全部人') + ' · 各週 BU 時數</div><div class="card" style="padding:0;overflow-x:auto"><table style="border-collapse:collapse;width:100%;font-size:13px;white-space:nowrap">';
+    h += '<tr style="background:var(--brand-l)"><th style="text-align:left;padding:8px 10px">BU</th>' + d.weeks.map(w => `<th style="padding:8px 6px;text-align:right">W${esc(w)}</th>`).join('') + '<th style="padding:8px 10px;text-align:right">合計</th></tr>';
+    h += Object.keys(allAgg).sort(buSort).map(bu => `<tr style="border-top:1px dashed var(--line)"><td style="padding:7px 10px;font-weight:600">${esc(bu)}</td>` +
+      d.weeks.map(w => { const a = perWeek[w][bu]; return `<td style="padding:7px 6px;text-align:right">${a ? fmtH(a.total) : dash}</td>`; }).join('') +
+      `<td style="padding:7px 10px;text-align:right;font-weight:700">${fmtH(allAgg[bu].total)}</td></tr>`).join('');
+    h += '</table></div>';
+  }
+  h += `<div class="hint">統計時間 ${esc(d.at)}（10 分鐘內重開會用同一份結果，按右上角 ↻ 重新統計）${d.failed.length ? '<br>⚠ 無法讀取：' + esc(d.failed.join('、')) : ''}</div>`;
+  v.innerHTML = h;
+}
+
+// Admin 磚塊的手繪風格圖示 (f1 白、f2 主色、f3 黃)
+const ICONS = {
+  folder: '<path class="f3" d="M3 7.5A1.5 1.5 0 0 1 4.5 6h4.3l2 2.2h8.7A1.5 1.5 0 0 1 21 9.7v8.8a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/><path class="f2" d="M3 11h18v7.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/><path d="M7 15h4"/>',
+  viewer: '<circle class="f1" cx="9" cy="7.5" r="3.3"/><path class="f1" d="M2.8 19.5c.7-3.6 3.2-5.6 6.2-5.6 1.6 0 3 .5 4.1 1.5"/><circle class="f2" cx="17" cy="16.5" r="4.6"/><path d="M17 14.2v2.4l1.6 1.1" stroke="#fff"/>',
+  export: '<path class="f1" d="M6 2.8h8.2L19 7.6V20a1.2 1.2 0 0 1-1.2 1.2H6A1.2 1.2 0 0 1 4.8 20V4A1.2 1.2 0 0 1 6 2.8z"/><path d="M14 2.8v4.8h5"/><rect class="f2" x="2.6" y="10.4" width="10.4" height="7.4" rx="1.4"/><path d="M5.4 12.6l3 3.2M8.4 12.6l-3 3.2" stroke="#fff"/><path d="M15.6 12v6m-2.4-2.4 2.4 2.4 2.4-2.4"/>',
+  calendar: '<rect class="f1" x="3" y="4.6" width="18" height="16.4" rx="2.2"/><path class="f2" d="M3 9.4h18V6.8a2.2 2.2 0 0 0-2.2-2.2H5.2A2.2 2.2 0 0 0 3 6.8z"/><path d="M8 2.8v4M16 2.8v4"/><path d="M12 12.2v6.2M8.9 15.3h6.2" stroke-width="2.2"/>',
+  useradd: '<circle class="f1" cx="9.6" cy="8" r="3.6"/><path class="f1" d="M3 20.4c.6-4 3.3-6.4 6.6-6.4s6 2.4 6.6 6.4z"/><circle class="f2" cx="18.2" cy="7.4" r="3.8"/><path d="M18.2 5.5v3.8M16.3 7.4h3.8" stroke="#fff"/>',
+  team: '<circle class="f3" cx="16.4" cy="8.4" r="2.9"/><path class="f3" d="M13.2 14.4c1-.8 2-1.2 3.3-1.2 2.6 0 4.5 1.9 5 5.3h-6.3"/><circle class="f2" cx="8.4" cy="8" r="3.4"/><path class="f2" d="M2.4 19.6c.6-3.8 3-6 6-6s5.4 2.2 6 6z"/>',
+  clipboard: '<rect class="f1" x="4.6" y="4" width="14.8" height="17.2" rx="2"/><rect class="f2" x="8.6" y="2.4" width="6.8" height="3.8" rx="1.2"/><path d="M8.2 10.6l1.1 1.1 2-2M13.2 10.8h3.2M8.2 15l1.1 1.1 2-2M13.2 15.2h3.2"/>',
+  key: '<circle class="f2" cx="8" cy="15.6" r="4.9"/><circle class="f1" cx="8" cy="15.6" r="1.6"/><path d="M11.6 12.1l8.6-8.6M16.8 6.9l2.2 2.2M18.7 5l2 2"/>',
+  chart: '<path d="M3 20.6h18"/><rect class="f3" x="4.6" y="11.6" width="3.8" height="9" rx=".9"/><rect class="f2" x="10.1" y="4.6" width="3.8" height="16" rx=".9"/><rect class="f1" x="15.6" y="8.6" width="3.8" height="12" rx=".9"/>',
+};
+
+function renderAdmin(v) {
+  setBar('Admin', S.adminEmail, true, false);
+  const tile = (act, icon, t, main) => `<button class="tile ${main ? 'main' : ''}" data-act="${act}"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[icon]}</svg></span>${t}</button>`;
+  v.innerHTML = '<div id="backupCard">' + backupCardHtml() + '</div><div class="section-title">雲端硬碟</div><div class="tiles">' +
+    tile('drive', 'folder', '雲端硬碟') +
+    tile('openany', 'viewer', '看某人工時') +
+    tile('export', 'export', '匯出 xlsx') +
+    '</div><div class="section-title">工時表</div><div class="tiles">' +
+    tile('newweek', 'calendar', '產生新週次', true) +
+    tile('newperson', 'useradd', '新增某人檔案') +
+    tile('members', 'team', 'Team Member') +
+    tile('bplist', 'clipboard', '專案清單') +
+    tile('pins', 'key', '密碼管理') +
+    tile('butab', 'chart', 'BU 時數') + '</div>' +
+    '<div class="hint" style="text-align:center;margin-top:16px">「BU 時數」是本期所有人的加總；「專案清單」會開啟目前工時表的專案清單分頁</div>';
+}
+
+// 雲端硬碟瀏覽
+async function loadDrive(id) {
+  S.route = 'drive';
+  try { S.drive = await busy('讀取雲端硬碟…', () => call('api_adminDrive', id || '')); } catch (e) { if (!S.drive) { S.route = 'admin'; } }
+  render(); window.scrollTo(0, 0);
+}
+function renderDrive(v) {
+  const d = S.drive;
+  if (!d) { v.innerHTML = '<div class="empty">讀取中…</div>'; return; }
+  setBar(d.name, d.isTop ? 'Working Hours 上一層' : '雲端硬碟', true, true);
+  let h = `<a class="ghost" href="${esc(d.url)}" target="_blank" rel="noopener" style="text-decoration:none;margin-top:0">在 Google 雲端硬碟開啟這個資料夾 ↗</a>`;
+  if (d.folders.length) h += '<div class="section-title">資料夾 (' + d.folders.length + ')</div><div class="list">' + d.folders.map(f =>
+    `<div class="item" style="padding:0 6px 0 0"><button data-dfolder="${esc(f.id)}" style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;padding:13px 0 13px 14px;text-align:left"><div class="avatar">📁</div><div class="t"><b>${esc(f.name)}</b></div><span class="chev">›</span></button>
+      <button class="del" data-dtrash="${esc(f.id)}" data-dname="${esc(f.name)}" data-disfolder="1" aria-label="刪除資料夾"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button></div>`).join('') + '</div>';
+  if (d.files.length) h += '<div class="section-title">檔案 (' + d.files.length + ')</div><div class="list">' + d.files.map(f =>
+    `<div class="item"><div class="avatar">${f.sheet ? '📊' : '📄'}</div>
+      <div class="t"><b>${esc(f.name)}</b><small>${new Date(f.updated).toLocaleString('zh-TW')}</small></div>
+      ${f.timesheet ? `<button class="chip" data-openfile="${esc(f.id)}" style="padding:6px 10px;font-size:12px">App</button>` : ''}
+      <a class="chip" href="${esc(f.url)}" target="_blank" rel="noopener" style="padding:6px 10px;font-size:12px;text-decoration:none;color:var(--brand)">開啟 ↗</a>
+      <button class="del" data-dtrash="${esc(f.id)}" data-dname="${esc(f.name)}" aria-label="刪除檔案"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button></div>`).join('') + '</div>';
+  if (!d.folders.length && !d.files.length) h += '<div class="empty">這個資料夾是空的</div>';
+  v.innerHTML = h;
+}
+
+// 週次欄位
+function weekFields(d) {
+  return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div><label>起始年</label><input class="search" id="wSy" inputmode="numeric" value="${d.sy}"></div>
+    <div><label>起始週</label><input class="search" id="wSw" inputmode="numeric" value="${d.sw}"></div>
+    <div><label>截止年</label><input class="search" id="wEy" inputmode="numeric" value="${d.ey}"></div>
+    <div><label>截止週</label><input class="search" id="wEw" inputmode="numeric" value="${d.ew}"></div></div>
+    <label style="display:flex;gap:8px;align-items:center;margin:4px 0 0"><input type="checkbox" id="wOver" style="width:18px;height:18px"> 覆蓋已存在的檔案</label>`;
+}
+const weekVals = M => ['#wSy', '#wSw', '#wEy', '#wEw'].map(s => Number(M.q(s).value));
+async function adminDefaults() {
+  if (!S.adminDef) S.adminDef = await busy('讀取中…', () => call('api_adminDefaults'));
+  return S.adminDef;
+}
+async function openNewWeek() {
+  const d = await adminDefaults();
+  const M = openModal('產生新週次工時表', `<div class="card field">${weekFields(d)}<div id="wOut" class="hint"></div></div>`,
+    '<button class="ghost" style="margin:0 0 8px" id="wPrev">預覽</button><button class="primary" style="margin:0" id="wGo">產生</button>');
+  M.q('#wPrev').onclick = async () => {
+    const r = await busy('預覽中…', () => call('api_adminPreviewWeek', ...weekVals(M))).catch(() => null);
+    if (r) M.q('#wOut').innerHTML = `資料夾：<b>${esc(r.folderName)}</b>${r.exists ? '（已存在）' : '（新建）'}<br>成員 ${r.members.length} 人：${esc(r.members.join('、'))}<br>檔名範例：${esc(r.sampleFile)}`;
+  };
+  M.q('#wGo').onclick = async () => {
+    const w = weekVals(M);
+    if (!confirm('產生 Week ' + w[1] + ' ~ ' + w[3] + ' 的工時表？\n每個成員都會產生一個檔案，約需 1~5 分鐘。')) return;
+    const r = await busy('產生中… (約 1~5 分鐘，請勿關閉 App)', () => call('api_adminGenerateWeek', ...w, M.q('#wOver').checked)).catch(() => null);
+    if (!r) return;
+    M.q('#wOut').innerHTML = `✔ 完成：<b>${esc(r.folderName)}</b><br>已產生 ${r.created.length} 個檔案` +
+      (r.skipped.length ? `，略過已存在 ${r.skipped.length} 個` : '') + `<br><a href="${esc(r.folderUrl)}" target="_blank" rel="noopener">開啟資料夾 ↗</a>`;
+    S.folders = null; toast('✔ 新週次已產生');
+  };
+}
+async function openNewPerson() {
+  const d = await adminDefaults();
+  const M = openModal('單獨新增某人檔案', `<div class="card field">
+      <label>成員</label><select class="search" id="pName">${d.members.map(m => `<option value="${esc(m.name)}">${esc(m.name)}${m.team ? '｜' + esc(m.team) : ''}</option>`).join('')}</select>
+      ${weekFields(d)}<div id="wOut" class="hint"></div></div>`,
+    '<button class="ghost" style="margin:0 0 8px" id="wPrev">預覽</button><button class="primary" style="margin:0" id="wGo">產生</button>');
+  M.q('#wPrev').onclick = async () => {
+    const r = await busy('預覽中…', () => call('api_adminPreviewPerson', ...weekVals(M), M.q('#pName').value)).catch(() => null);
+    if (r) M.q('#wOut').innerHTML = `資料夾：<b>${esc(r.folderName)}</b>${r.folderExists ? '' : '（會新建）'}<br>檔名：${esc(r.fileName)}${r.fileExists ? '（<b style="color:var(--err)">已存在</b>，要勾選覆蓋才會重新產生）' : ''}`;
+  };
+  M.q('#wGo').onclick = async () => {
+    const name = M.q('#pName').value;
+    if (!confirm('產生「' + name + '」的工時表？')) return;
+    const r = await busy('產生中…', () => call('api_adminGeneratePerson', ...weekVals(M), name, M.q('#wOver').checked)).catch(() => null);
+    if (!r) return;
+    M.q('#wOut').innerHTML = r.created.length ? `✔ 已產生：${r.created.map(c => `<a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.name)}</a>`).join('<br>')}`
+      : '檔案已存在，未產生 (勾選「覆蓋已存在的檔案」可重新產生)';
+  };
+}
+async function pickFolder(title) {
+  const fs = S.folders || await busy('讀取週次…', () => callA('api_listFolders'));
+  S.folders = fs;
+  return new Promise(res => {
+    const M = openModal(title, '<div class="list">' + fs.map(f => `<button class="item" data-pf="${esc(f.id)}"><div class="avatar">📁</div><div class="t"><b>${esc(f.name)}</b></div><span class="chev">›</span></button>`).join('') + '</div>');
+    M.el.addEventListener('click', e => { const b = e.target.closest('[data-pf]'); if (b) { M.close(); res(fs.find(f => f.id === b.dataset.pf)); } });
+  });
+}
+async function openAnyone() {
+  const f = await pickFolder('選擇週次');
+  const files = await busy('讀取檔案…', () => call('api_adminListFiles', f.id));
+  const M = openModal(esc(f.name), '<div class="list">' + files.map(x => `<button class="item" data-of="${esc(x.id)}"><div class="avatar">${esc(x.person.slice(0, 1).toUpperCase())}</div><div class="t"><b>${esc(x.person)}</b><small>${esc(x.name)}</small></div><span class="chev">›</span></button>`).join('') + '</div>');
+  M.el.addEventListener('click', e => { const b = e.target.closest('[data-of]'); if (b) { M.close(); openFile(b.dataset.of); } });
+}
+async function exportXlsx() {
+  const f = await pickFolder('匯出哪個週次？');
+  const r = await busy('匯出中… (檔案多時約 1~3 分鐘)', () => call('api_adminExport', f.id)).catch(() => null);
+  if (!r) return;
+  const bin = atob(r.b64), arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([arr], { type: 'application/zip' }));
+  a.download = r.zipName; document.body.appendChild(a); a.click(); a.remove();
+  toast('✔ 已匯出 ' + r.names.length + ' 個檔案' + (r.failed.length ? '，失敗 ' + r.failed.length + ' 個' : ''));
+}
+async function openPins() {
+  let ps = await busy('讀取中…', () => call('api_adminPins'));
+  const shown = {};                                   // 已檢視的密碼 (只留在這個畫面)
+  const status = p => {
+    if (!p.has) return '尚未設定';
+    if (p.name in shown) return shown[p.name]
+      ? `密碼：<b class="hand" style="font-size:20px;letter-spacing:2px;color:var(--brand-d)">${esc(shown[p.name])}</b>`
+      : '舊版密碼無法顯示，對方下次登入後就看得到（或直接重設）';
+    return '已設定密碼';
+  };
+  const body = () => '<div class="list">' + ps.map(p => `<div class="item"><div class="t"><b>${esc(p.name)}</b><small>${status(p)}</small></div>
+      ${p.has ? `<button class="chip" data-vp="${esc(p.name)}">${p.name in shown ? '隱藏' : '檢視'}</button>
+      <button class="chip" data-rp="${esc(p.name)}" style="color:var(--err)">重設</button>` : ''}</div>`).join('') + '</div>' +
+    '<div class="hint">重設後，該成員下次開 App 時可以重新設定密碼；他其他手機上的登入會失效。</div>';
+  const M = openModal('App 密碼管理', body());
+  M.el.addEventListener('click', async e => {
+    const v = e.target.closest('[data-vp]');
+    if (v) {
+      const n = v.dataset.vp;
+      if (n in shown) delete shown[n];
+      else shown[n] = await busy('讀取中…', () => call('api_adminViewPin', n)).catch(() => null);
+      if (shown[n] === null) delete shown[n];
+      M.q('.sheet-b').innerHTML = body();
+      return;
+    }
+    const b = e.target.closest('[data-rp]'); if (!b) return;
+    if (!confirm('重設「' + b.dataset.rp + '」的 App 密碼？')) return;
+    ps = await busy('重設中…', () => call('api_adminResetPin', b.dataset.rp)).catch(() => ps);
+    delete shown[b.dataset.rp];
+    M.q('.sheet-b').innerHTML = body(); toast('✔ 已重設');
+  });
+}
+
+// Team Member 編輯
+async function loadMembers() {
+  S.route = 'members';
+  try { S.tm = await busy('讀取 Team Member…', () => call('api_adminTeamMembers')); S.tmDirty = false; }
+  catch (e) { if (!S.tm) S.route = 'admin'; }
+  render();
+}
+function renderMembers(v) {
+  const t = S.tm;
+  if (!t) { v.innerHTML = '<div class="empty">讀取中…</div>'; return; }
+  setBar('Team Member', t.title, true, true);
+  const groups = t.layout === 'single' ? [''] : t.teams.slice();
+  t.members.forEach(m => { if (!groups.includes(m.team)) groups.push(m.team); });
+  const opts = sel => groups.map(g => `<option value="${esc(g)}" ${g === sel ? 'selected' : ''}>${esc(g || '(未分組)')}</option>`).join('');
+  let h = '';
+  groups.forEach((g, gi) => {
+    const ms = t.members.map((m, i) => Object.assign({ i }, m)).filter(m => m.team === g);
+    h += `<div class="section-title">${esc(g || (t.layout === 'single' ? '成員' : '(未分組)'))} · ${ms.length} 人</div><div class="list">`;
+    h += ms.map(m => `<div class="item" style="padding:10px 14px"><div class="t"><b>${esc(m.name)}</b></div>
+      ${t.layout === 'single' ? '' : `<select data-tmteam="${m.i}" style="border:1px solid var(--line);border-radius:8px;padding:6px;background:#fff;max-width:130px">${opts(m.team)}</select>`}
+      <button class="del" data-tmdel="${m.i}" aria-label="刪除">✕</button></div>`).join('');
+    h += `<div class="item" style="padding:8px 10px"><input class="search" data-tmnew="${gi}" placeholder="新增成員名字" style="margin:0;flex:1"><button class="chip on" data-tmadd="${gi}">加入</button></div></div>`;
+  });
+  if (t.layout === 'cols') h += '<button class="ghost" data-act="tmteam">＋ 新增 Team 欄</button>';
+  h += `<button class="primary" data-act="tmsave" ${S.tmDirty ? '' : 'disabled'}>${S.tmDirty ? '儲存 Team Member' : '沒有修改'}</button>`;
+  h += `<div class="hint">新增的成員要再用「單獨新增某人檔案」產生工時表；刪除成員不會刪除他已經產生的檔案。</div>
+    <a class="ghost" href="${esc(t.url)}" target="_blank" rel="noopener" style="text-decoration:none">在 Google 試算表開啟 Team Member ↗</a>`;
+  v.innerHTML = h;
+  S.tmGroups = groups;
+}
+
+// 新功能的點擊事件
+$('#view').addEventListener('click', async e => {
+  const t = e.target.closest('[data-act],[data-buweek],[data-bsgroup],[data-bsweek],[data-bsopen],[data-buopen],[data-bpteam],[data-bpedit],[data-dfolder],[data-dtrash],[data-openfile],[data-tmdel],[data-tmadd]');
+  if (!t) return;
+  const d = t.dataset;
+  if (d.buweek) { S.buWeek = d.buweek; return render(); }
+  if (d.bsgroup !== undefined) { S.bsGroup = d.bsgroup; S.bsOpen = {}; return render(); }
+  if (d.bsweek) { S.bsWeek = d.bsweek; return render(); }
+  if (d.bsopen) { S.bsOpen[d.bsopen] = !S.bsOpen[d.bsopen]; return render(); }
+  if (d.buopen) { S.buOpen[d.buopen] = !S.buOpen[d.buopen]; return render(); }
+  if (d.bpteam) { S.bpTeam = Number(d.bpteam); return render(); }
+  if (d.bpedit) return bpEdit(Number(d.bpedit));
+  if (d.dtrash) {
+    const isF = !!d.disfolder;
+    if (!confirm((isF ? '刪除資料夾「' + d.dname + '」？\n裡面所有的檔案會一起刪除。' : '刪除檔案「' + d.dname + '」？') +
+      '\n\n會移到雲端硬碟的垃圾桶，30 天內可以還原。')) return;
+    try {
+      await busy('刪除中…', () => call('api_adminTrash', d.dtrash, isF));
+      toast('已刪除「' + d.dname + '」'); S.folders = null;
+      return loadDrive(S.drive.id);
+    } catch (err) { return; }
+  }
+  if (d.dfolder) return loadDrive(d.dfolder);
+  if (d.openfile) return openFile(d.openfile);
+  if (d.tmdel) { S.tm.members.splice(Number(d.tmdel), 1); S.tmDirty = true; return render(); }
+  if (d.tmadd) {
+    const inp = document.querySelector('[data-tmnew="' + d.tmadd + '"]');
+    const name = inp.value.trim();
+    if (!name) return toast('請輸入名字', true);
+    if (S.tm.members.some(m => m.name.toLowerCase() === name.toLowerCase())) return toast('「' + name + '」已經在名單裡', true);
+    S.tm.members.push({ name, team: S.tmGroups[Number(d.tmadd)] }); S.tmDirty = true; return render();
+  }
+  const act = d.act;
+  try {
+    if (act === 'admin') { S.route = 'admin'; render(); }
+    else if (act === 'bpadd') bpEdit(-1);
+    else if (act === 'backupnow') {
+      if (!confirm('現在把 Working Hours 資料夾完整備份一次？\n會覆蓋上一次的備份，檔案多時約需 1~5 分鐘。')) return;
+      S.backup = await busy('備份中…（約 1~5 分鐘，請勿關閉 App）', () => call('api_adminBackupNow'));
+      render(); toast('✔ 備份完成：' + S.backup.last.files + ' 個檔案');
+    } else if (act === 'backupon' || act === 'backupoff') {
+      S.backup = await busy('設定中…', () => call('api_adminBackupSchedule', act === 'backupon'));
+      render(); toast(act === 'backupon' ? '✔ 已啟用每週三 17:00 自動備份' : '已停用自動備份');
+    }
+    else if (act === 'bplist') {
+      if (!S.data) return toast('請先開啟一份工時表', true);
+      S.route = 'sheet'; S.tab = 'list'; render(); window.scrollTo(0, 0);
+    }
+    else if (act === 'butab') await openBuSum(null, false);
+    else if (act === 'drive') await loadDrive('');
+    else if (act === 'members') await loadMembers();
+    else if (act === 'newweek') await openNewWeek();
+    else if (act === 'newperson') await openNewPerson();
+    else if (act === 'openany') await openAnyone();
+    else if (act === 'export') await exportXlsx();
+    else if (act === 'pins') await openPins();
+    else if (act === 'tmteam') {
+      const n = (prompt('新的 Team 名稱 (例如 ABC Team)') || '').trim();
+      if (n && !S.tm.teams.includes(n)) { S.tm.teams.push(n); S.tmDirty = true; render(); }
+    } else if (act === 'tmsave') {
+      S.tm = await busy('儲存 Team Member…', () => call('api_adminSaveTeamMembers', { teams: S.tm.teams, members: S.tm.members, ver: S.tm.ver }));
+      S.tmDirty = false; S.adminDef = null; render(); toast('✔ Team Member 已儲存');
+    }
+  } catch (err) { /* busy() 已顯示錯誤 */ }
+});
+$('#view').addEventListener('change', e => {
+  if (e.target.id === 'bsFolder') { openBuSum(e.target.value, false); return; }
+  const s = e.target.closest('[data-tmteam]');
+  if (!s) return;
+  const [m] = S.tm.members.splice(Number(s.dataset.tmteam), 1);   // 換 Team 的人排到新 Team 的最後
+  m.team = s.value; S.tm.members.push(m); S.tmDirty = true; render();
+});
+
+(async function start() {
+  // 管理者：Google 驗證目前帳號是 hank.wang@quantatw.com 時，不需要密碼並開放管理功能
+  // (網頁版不經過 Google 登入，一律是一般使用者；管理者請用橘色 App)
+  if (!WEB_API || USE_MOCK) try {
+    const b = await call('api_bootstrap');
+    if (b && b.admin) {
+      S.admin = true; S.adminEmail = b.email;
+      if (!S.token) S.token = { p: b.adminPerson, s: '' };   // 不存到手機，只在這次使用
+    }
+  } catch (e) { /* 舊版後端沒有 api_bootstrap 時略過 */ }
+  document.body.classList.toggle('admin', S.admin);            // 管理者：橘色主題 + 橘色 Logo
+  document.querySelector('meta[name="theme-color"]').setAttribute('content', S.admin ? '#e8731c' : '#fbf6ea');
+  // 「專案清單」(修改 BU Project) 與「Admin」只有管理者看得到
+  document.querySelector('.tabs [data-tab="admin"]').classList.toggle('hidden', !S.admin);
+  document.querySelector('.tabs [data-tab="list"]').classList.toggle('hidden', !S.admin);
+  if (!S.admin && S.tab === 'list') S.tab = 'days';
+  const bio = BIO.get();
+  if (S.token && !S.admin && bio && bio.p === S.token.p) {   // 已啟用 Face ID / 指紋：先解鎖
+    S.route = 'locked'; render();
+    setTimeout(() => unlock(true), 300);                    // 自動跳出驗證 (手機不允許時改按按鈕)
+  } else if (S.token) goHome(true);                         // 已登入：直接進入最新週次的自己檔案
+  else { S.route = 'login'; loadPeople(); }
+})();
+
+/* ============================================================
+ * 本機預覽用假資料 (部署到 Apps Script 時不會用到)
+ * ============================================================ */
+var MOCK = IS_GAS ? null : (function () {
+  const pad = n => String(n).padStart(2, '0');
+  const key = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  const days = [];
+  const start = new Date(2026, 9, 25);
+  for (let i = 0; i < 28; i++) {
+    const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+    days.push({ k: key(d), w: 43 + Math.floor(i / 7), hol: d.getDay() === 0 || d.getDay() === 6 });
+  }
+  const mk = (sheet, bu, adc, fill) => {
+    const cells = {};
+    days.forEach((d, i) => { const h = !d.hol && fill ? fill(i) : ''; cells[d.k] = { r: i + 2, h, a: h ? 'Experiment & Paper Work' : '' }; });
+    return { sheet, bu, adc, cells };
+  };
+  const file = {
+    id: 'f1', title: 'Hank_Week 43~46 Resource 2026', url: 'https://docs.google.com/', folderId: 'd1', folderName: '2026 Week 43 to 46',
+    person: 'Hank', team: 'Hank Team', action: 'Experiment & Paper Work', days,
+    diffs: [{ sheet: 'A9F1', k: days[18].k, r: 20, all: 2, proj: 1 }, { sheet: 'IG3', k: days[17].k, r: 19, all: 3, proj: 2 }],
+    projects: [mk('A9F1', 'BU8', false, i => i < 22 ? 1 : ''), mk('B30LA', 'BU3', false, i => i < 22 ? 0.5 : ''), mk('IG3', 'BU10', false, i => i < 22 ? 2 : ''),
+      mk('M25AA', 'BU12', false, i => i < 22 ? 1.5 : ''), mk('V29E&V29F', 'BU12', false, i => i < 10 ? 3 : ''), mk('ADC', 'PDC', true, i => i % 5 === 0 ? 1 : '')],
+  };
+  let avail = [{ name: 'KI7', bu: 'BU10' }, { name: 'A9K', bu: 'BU7' }, { name: 'A88E', bu: 'BU7' }, { name: 'MHB', bu: 'BU12' }, { name: 'NY5A', bu: 'BU2' }];
+  const clone = o => JSON.parse(JSON.stringify(o));
+  const pins = { hank: '1234' };      // 假資料：Hank 已設定密碼 1234
+  const auth = t => { if (t && t.s === '') return t.p; /* 管理者 */ if (!t || !pins[t.p.toLowerCase()] || t.s !== 'sig' + pins[t.p.toLowerCase()]) throw new Error('AUTH: 請先登入'); return t.p; };
+  let bp = { url: '#', title: 'BU Project', ver: 'v1', teams: [
+    { team: 'JL Team', col: 0, buCol: 1, rows: [{ name: 'KI7', bu: 'BU10' }, { name: 'A9K', bu: 'BU7' }, { name: 'MHB', bu: 'BU12' }] },
+    { team: 'Hank Team', col: 2, buCol: 3, rows: [{ name: 'A9F1', bu: 'BU8' }, { name: 'B30LA', bu: 'BU8' }, { name: 'IG3', bu: 'BU10' }, { name: 'V3NQ', bu: 'BU15' }] }] };
+  const backup = { scheduled: false, last: null, source: 'Working Hours', location: 'ADC Working Hours / 備份資料', folderUrl: '#' };
+  let tm = { url: '#', title: 'Team Member', layout: 'cols', ver: 't1', teams: ['Hank Team', 'JL Team', 'All'],
+    members: [{ name: 'Hank', team: 'Hank Team' }, { name: 'Ryan', team: 'Hank Team' }, { name: 'JL', team: 'JL Team' }, { name: 'Andy', team: 'JL Team' }, { name: 'Roger', team: 'All' }] };
+  return {
+    api_bootstrap: () => ({ admin: false, email: 'hank.wang@quantatw.com', adminPerson: 'Hank' }),
+    api_buProjects: () => clone(bp),
+    api_buProjectsSave: (t, teams, ver) => { if (ver !== bp.ver) throw new Error('版本不符'); teams.forEach(x => { bp.teams.find(y => y.col === x.col).rows = x.rows; }); bp.ver += '+'; return clone(bp); },
+    api_adminDrive: id => id ? { id, name: '2026 Week 43 to 46', url: '#', isTop: false, parentId: '', folders: [], files: [{ id: 'f1', name: 'Hank_Week 43~46 Resource 2026', url: '#', sheet: true, timesheet: true, updated: Date.now() }] }
+      : { id: 'top', name: 'Working Hours 專案', url: '#', isTop: true, parentId: '', folders: [{ id: 'wh', name: 'Working Hours' }, { id: 'd1', name: '2026 Week 43 to 46' }], files: [{ id: 'g', name: 'Working Hours Generation File', url: '#', sheet: true, timesheet: false, updated: Date.now() }, { id: 'tmf', name: 'Team Member', url: '#', sheet: true, timesheet: false, updated: Date.now() }] },
+    api_adminDefaults: () => ({ sy: 2026, sw: 47, ey: 2026, ew: 51, members: clone(tm.members) }),
+    api_adminPreviewWeek: (sy, sw, ey, ew) => ({ folderName: 'Working Hours / ' + ey + ' Week ' + sw + ' to ' + ew, exists: false, members: tm.members.map(m => m.name), sampleFile: 'Hank_Week ' + sw + '~' + ew + ' Resource ' + ey }),
+    api_adminGenerateWeek: () => ({ folderName: '2026 Week 47 to 51', folderUrl: '#', created: tm.members.map(m => ({ name: m.name, url: '#' })), skipped: [] }),
+    api_adminPreviewPerson: (sy, sw, ey, ew, n) => ({ folderName: 'Working Hours / 2026 Week 47 to 51', folderExists: true, fileName: n + '_Week 47~51 Resource 2026', fileExists: false }),
+    api_adminGeneratePerson: (sy, sw, ey, ew, n) => ({ created: [{ name: n + '_Week 47~51 Resource 2026', url: '#' }], skipped: [] }),
+    api_adminListFiles: () => [{ id: 'f1', name: 'Hank_Week 43~46 Resource 2026', person: 'Hank' }, { id: 'x2', name: 'Ryan_Week 43~46 Resource 2026', person: 'Ryan' }],
+    api_adminExport: () => ({ zipName: 'demo.zip', b64: btoa('demo'), names: ['a.xlsx'], failed: [] }),
+    api_adminPins: () => [{ name: 'Hank', has: true }, { name: 'Ryan', has: true }, { name: 'Luke', has: false }],
+    api_adminViewPin: n => n === 'Hank' ? '1234' : '',
+    api_adminTrash: (id, f) => ({ name: id }),
+    api_adminBuSummary: (fid) => ({ folderId: fid, folderName: '2026 Week 43 to 46', teams: ['Hank Team', 'JL Team', 'All'], at: '11/21 16:10', failed: [],
+      people: [{ name: 'Hank', team: 'Hank Team' }, { name: 'Ryan', team: 'Hank Team' }, { name: 'JL', team: 'JL Team' }, { name: 'Andy', team: 'JL Team' }, { name: 'Roger', team: 'All' }],
+      bus: ['BU10', 'BU8', 'BU7', 'BU12', 'PDC'], weeks: ['43', '44', '45', '46'],
+      rows: [[0,0,'43',20],[0,1,'43',12],[0,4,'43',6],[0,0,'44',25],[0,1,'44',15],[1,0,'43',30],[1,3,'44',22],[1,0,'45',28],[2,2,'43',35],[2,3,'44',30],[2,2,'45',32],[3,2,'43',38],[3,4,'44',4],[4,0,'45',16],[4,2,'45',16]] }),
+    api_adminBackupStatus: () => clone(backup),
+    api_adminBackupNow: () => { backup.last = { when: '2026/11/21 15:30', files: 35, folders: 2, secs: 48, url: '#' }; return clone(backup); },
+    api_adminBackupSchedule: on => { backup.scheduled = !!on; return clone(backup); },
+    api_adminResetPin: () => [{ name: 'Hank', has: false }, { name: 'Ryan', has: true }, { name: 'Luke', has: false }],
+    api_adminTeamMembers: () => clone(tm),
+    api_adminSaveTeamMembers: d => { tm.teams = d.teams; tm.members = d.members; tm.ver += '+'; return clone(tm); },
+    api_people: () => ['Andy', 'Astro', 'Eason', 'Hank', 'JL', 'Josson', 'Luke', 'Mini', 'Neil', 'Richard', 'Rod', 'Roger', 'Ronan', 'Ryan', 'Steve', 'Woody']
+      .map(n => ({ name: n, has: !!pins[n.toLowerCase()] })),
+    api_login: (name, pin) => {
+      const k = name.toLowerCase(); let created = false;
+      if (!pins[k]) { pins[k] = pin; created = true; } else if (pins[k] !== pin) throw new Error('密碼錯誤');
+      return { token: { p: name, s: 'sig' + pin }, created };
+    },
+    api_changePin: (t, pin) => { const p = auth(t); pins[p.toLowerCase()] = pin; return { token: { p, s: 'sig' + pin } }; },
+    api_listFolders: t => { auth(t); return [{ id: 'd1', name: '2026 Week 43 to 46', created: Date.parse('2026-10-27') }, { id: 'd0', name: '2026 Week 39 to 42', created: Date.parse('2026-10-03') }]; },
+    api_findMyFile: (t, id) => auth(t) === 'Hank' && id === 'd1' ? { id: 'f1', name: file.title } : null,
+    api_load: t => { auth(t); return clone(file); },
+    api_save: (t, id, ch) => { auth(t); ch.forEach(c => { const p = file.projects.find(x => x.sheet === c.sheet); p.cells[c.k].h = c.h; p.cells[c.k].a = c.a; }); return Object.assign(clone(file), { saved: ch.length }); },
+    api_setDefaultAction: (t, id, s) => { auth(t); const old = file.action; file.action = s.trim(); file.projects.forEach(p => { if (p.adc) return; Object.values(p.cells).forEach(c => { if (c.h && (!c.a || c.a === old)) c.a = file.action; }); }); return clone(file); },
+    api_availableProjects: t => { auth(t); return { team: file.team, projects: clone(avail), note: '' }; },
+    api_addProjects: (t, id, picks) => { auth(t); picks.forEach(pk => { const adc = file.projects.pop(); file.projects.push(mk(pk.name, pk.bu, false, null), adc); avail = avail.filter(a => a.name !== pk.name); }); return Object.assign(clone(file), { added: picks.map(p => p.name) }); },
+    api_fixFromAll: (t, id, useProj) => { auth(t); const n = file.diffs.length; file.diffs.forEach(d => { const p = file.projects.find(x => x.sheet === d.sheet); if (!useProj) p.cells[d.k].h = d.all; }); file.diffs = []; return Object.assign(clone(file), { fixed: n }); },
+    api_deleteProject: (t, id, n) => { auth(t); file.projects = file.projects.filter(p => p.sheet !== n); return clone(file); },
+  };
+})();
+</script>
+</body>
+</html>
